@@ -38,14 +38,6 @@
 | Memcached | 43% | 80% |
 
 
-| head1        | head two          | three |
-|:-------------|:------------------|:------|
-| ok           | good swedish fish | nice  |
-| out of stock | good and plenty   | nice  |
-| ok           | good `oreos`      | hmm   |
-| ok           | good `zoute` drop | yumm  |
-
-
 
 ## 实现细节：如何使用NIC上的Mem
 - https://stackoverflow.com/questions/72605366/how-can-i-use-the-memory-inside-nics
