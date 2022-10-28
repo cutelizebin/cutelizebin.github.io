@@ -4,6 +4,8 @@ layout: default
 
 # cutelizebin personal site
 
+[TOC]
+
 ## Papers Reading
 
 - [ASPLOS'22 NICMEM](./post/asplos22-nicmem.md)
