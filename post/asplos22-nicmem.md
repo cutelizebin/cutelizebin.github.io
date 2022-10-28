@@ -52,4 +52,4 @@
 
 具体来说，就是IBVerbs提供的一系列接口（[API Doc](https://docs.nvidia.com/networking/display/OFEDv502180/Programming#Programming-DeviceMemoryProgramming)），能够使用网卡上的memory。
 
-![API List](../img/nicmem-driver-api.png)
+![API List](./img/nicmem-driver-api.png)
