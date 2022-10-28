@@ -25,7 +25,7 @@ Meta针对存储场景做了一个新的IO Control/Scheduler 机制。能够更�
 
 ### Linux现有的几种IO Scheduler的对比情况
 
-![LInux IO Control Mechanism](../img/iocost-cmp.png)
+![LInux IO Control Mechanism](./img/iocost-cmp.png)
 
 
 ### IOCost Design
