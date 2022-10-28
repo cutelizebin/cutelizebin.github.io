@@ -29,7 +29,7 @@
 ## 最终效果
 
 | Benchmark | latency | bandwidth |
-| --- | --- | --- |
+|:---|:---|:---|
 | NFV | 23% | 19% |
 | Memcached | 43% | 80% |
 
