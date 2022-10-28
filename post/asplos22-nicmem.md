@@ -1,6 +1,6 @@
 # ASPLOS'22 The Benefits of General on-nic Mem
 
-## [back to home](./)
+## [back to home](/)
 
 ## 背景和问题
 
