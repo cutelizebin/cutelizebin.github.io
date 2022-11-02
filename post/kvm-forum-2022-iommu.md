@@ -16,6 +16,11 @@ Live Update 和 Live Migration一直是云场景下关键的功能需求。
 2. 设备的配置空间保持不变
 3. IOMMU的中断映射表的保存恢复
 
+**问题关键点**
 ![问题关键点](./img/kvm-forum-2022-iommu-preserving.png)
 
+**解决方案的关键点**
 ![解决方案的关键点](./img/kvm-forum-2022-iommu-preserving-solution.png)
+
+**slides**
+[原文链接](https://static.sched.com/hosted_files/kvmforum2022/65/kvmforum2022-Preserving%20IOMMU%20states%20during%20kexec%20reboot-v4.pdf)
