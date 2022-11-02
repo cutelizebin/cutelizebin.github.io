@@ -13,3 +13,8 @@ layout: default
 - [ASPLOS'22 IOCost](./post/asplos22-iocost.md)
 - [ASPLOS'22 Memory-Harvest-VM](./post/asplos22-memory-harvesting-vm.md)
 - [OSDI'20 Harvest-VM](./post/osdi20-harvest-vm.md)
+
+
+## Tech News
+
+- [KVM Forum 2022 - IOMMU Part](./post/kvm-forum-2022-iommu.md)
