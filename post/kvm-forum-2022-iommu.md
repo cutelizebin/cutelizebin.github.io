@@ -9,18 +9,12 @@ Live Update 和 Live Migration一直是云场景下关键的功能需求。
 但在当前，设备直通就无法完成Live Update和Migration的功能。
 其关键点在如何保存设备和IOMMU相关的状态。
 
-这篇字节跳动的工作就关注到了这个核心问题：如何保存IOMMU的状态。
+[详细内容](./2022-kvm-forum/iommu-preserving.md)
 
-解决方案核心：
-1. 保持IOMMU页表映射不变
-2. 设备的配置空间保持不变
-3. IOMMU的中断映射表的保存恢复
+## 2. Linux New API: IOMMU FD
 
-**问题关键点**
-![问题关键点](./img/kvm-forum-2022-iommu-preserving.png)
+以往控制iommu的API是VFIO，包括container，group，device这些概念。
+现在逐渐在转向一个新的API，iommufd.
+但为什么要有一个新的接口，主要解决了什么问题。
 
-**解决方案的关键点**
-![解决方案的关键点](./img/kvm-forum-2022-iommu-preserving-solution.png)
-
-**slides**
-[原文链接](https://static.sched.com/hosted_files/kvmforum2022/65/kvmforum2022-Preserving%20IOMMU%20states%20during%20kexec%20reboot-v4.pdf)
+[原文链接](https://kvmforum2022.sched.com/event/15jKZ/iommufd-integration-in-qemu-yi-liu-intel-eric-auger-red-hat)
