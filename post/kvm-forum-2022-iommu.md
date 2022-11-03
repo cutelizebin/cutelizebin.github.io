@@ -17,4 +17,9 @@ Live Update 和 Live Migration一直是云场景下关键的功能需求。
 现在逐渐在转向一个新的API，iommufd.
 但为什么要有一个新的接口，主要解决了什么问题。
 
+> /dev/iommu provides an unified interface for managing I/O page tables for 
+devices assigned to userspace. Device passthrough frameworks (VFIO, vDPA, 
+etc.) are expected to use this interface instead of creating their own logic to 
+isolate untrusted device DMAs initiated by userspace. 
+
 [原文链接](https://kvmforum2022.sched.com/event/15jKZ/iommufd-integration-in-qemu-yi-liu-intel-eric-auger-red-hat)
