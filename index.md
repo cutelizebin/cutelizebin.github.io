@@ -18,3 +18,7 @@ layout: default
 ## Tech News
 
 - [KVM Forum 2022 - IOMMU Part](./post/kvm-forum-2022-iommu.md)
+
+## Tech Notes
+
+- [Linux UIO](./post/linux-uio.md)
