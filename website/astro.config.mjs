@@ -9,7 +9,7 @@ export default defineConfig({
     starlight({
       title: 'cutelizebin',
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/cutelizebin/cutelizebin.github.io' },
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/cutelizebin' },
       ],
       sidebar: [
         {
