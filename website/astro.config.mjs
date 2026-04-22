@@ -13,14 +13,6 @@ export default defineConfig({
       ],
       sidebar: [
         {
-          label: 'Papers',
-          autogenerate: { directory: 'papers' },
-        },
-        {
-          label: 'Tools',
-          autogenerate: { directory: 'tools' },
-        },
-        {
           label: 'Notes',
           autogenerate: { directory: 'notes' },
         },
