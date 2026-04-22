@@ -1,6 +1,13 @@
-_site
-.sass-cache
-Gemfile.lock
-*.gem
-.jekyll-cache
-.jekyll-cache
+# Dependencies
+node_modules/
+
+# Build output
+website/dist/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+*.log
