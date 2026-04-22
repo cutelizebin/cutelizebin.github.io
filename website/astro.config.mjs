@@ -10,6 +10,7 @@ export default defineConfig({
       title: 'cutelizebin',
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/cutelizebin' },
+        { icon: 'x.com', label: 'X (Twitter)', href: 'https://x.com/Zebin_Li98' },
       ],
       sidebar: [
         {
