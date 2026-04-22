@@ -15,6 +15,10 @@ export default defineConfig({
       sidebar: [
         {
           label: 'Notes',
+          link: '/notes/',
+        },
+        {
+          label: 'All Notes',
           autogenerate: { directory: 'notes' },
         },
       ],
