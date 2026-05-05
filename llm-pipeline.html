@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LLM Inference Pipeline - Zebin Li</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="canonical" href="https://cutelizebin.github.io/llm-pipeline.html">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,7 +25,6 @@
             opacity: 0.7;
             font-size: 14px;
         }
-        .back a:hover { opacity: 1; }
         .title {
             position: fixed;
             top: 24px;
@@ -39,28 +37,7 @@
             font-weight: 600;
             margin-bottom: 4px;
         }
-        .title p {
-            font-size: 12px;
-            opacity: 0.6;
-        }
-        .legend {
-            position: fixed;
-            bottom: 24px;
-            left: 24px;
-            font-size: 12px;
-            opacity: 0.7;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 4px;
-        }
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 3px;
-        }
+        .title p { font-size: 12px; opacity: 0.6; }
         #canvas-container {
             width: 100vw;
             height: 100vh;
@@ -73,234 +50,161 @@
     </div>
     <div class="title">
         <h1>LLM Inference Pipeline</h1>
-        <p>API Request → Tokenize → Schedule → GPU Inference</p>
-    </div>
-    <div class="legend">
-        <div class="legend-item">
-            <div class="legend-color" style="background: #ef4444;"></div>
-            <span>API Entry</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background: #f59e0b;"></div>
-            <span>Tokenization</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background: #8b5cf6;"></div>
-            <span>Scheduler</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background: #2563eb;"></div>
-            <span>GPU Inference</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background: #10b981;"></div>
-            <span>KVCache</span>
-        </div>
+        <p>API → Tokenize → Schedule → GPU</p>
     </div>
     <div id="canvas-container"></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script>
-        // Scene setup
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // Scene
         const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a0a);
+
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
 
-        // Node positions (left to right)
-        const positions = {
-            entry: new THREE.Vector3(-6, 0, 0),
-            tokenizer: new THREE.Vector3(-2, 0, 0),
-            scheduler: new THREE.Vector3(2, 0, 0),
+        // Positions
+        const P = {
+            entry: new THREE.Vector3(-5, 0, 0),
+            tokenizer: new THREE.Vector3(-1.5, 0, 0),
+            scheduler: new THREE.Vector3(2.5, 0, 0),
             gpu: new THREE.Vector3(6, 0, 0)
         };
 
-        // 1. API Entry (red) - Door/Portal
+        // 1. API Entry (red ring)
         const entryGroup = new THREE.Group();
-        const doorFrame = new THREE.Mesh(
-            new THREE.TorusGeometry(1, 0.1, 16, 32),
-            new THREE.MeshPhongMaterial({ color: 0xef4444, emissive: 0xef4444, emissiveIntensity: 0.3 })
+        const torus = new THREE.Mesh(
+            new THREE.TorusGeometry(1, 0.08, 16, 32),
+            new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xef4444, emissiveIntensity: 0.3 })
         );
-        const doorInner = new THREE.Mesh(
-            new THREE.CircleGeometry(0.85, 32),
-            new THREE.MeshBasicMaterial({ color: 0x7f1d1d, transparent: true, opacity: 0.5 })
-        );
-        entryGroup.add(doorFrame, doorInner);
-        entryGroup.position.copy(positions.entry);
+        entryGroup.add(torus);
+        entryGroup.position.copy(P.entry);
         scene.add(entryGroup);
 
-        // Entry label
-        const entryLabel = createTextSprite('API Entry', '#ef4444');
-        entryLabel.position.set(-6, -1.8, 0);
-        scene.add(entryLabel);
+        addLabel('API Entry', P.entry.clone().add(new THREE.Vector3(0, -1.8, 0)), '#ef4444');
 
-        // 2. Tokenizer (yellow) - Transformer box
-        const tokenizerGroup = new THREE.Group();
-        const tokenBox = new THREE.Mesh(
-            new THREE.BoxGeometry(1.5, 1.5, 1.5),
-            new THREE.MeshPhongMaterial({ color: 0xf59e0b, shininess: 80 })
+        // 2. Tokenizer (yellow box)
+        const tokenGroup = new THREE.Group();
+        const tbox = new THREE.Mesh(
+            new THREE.BoxGeometry(1.2, 1.2, 1.2),
+            new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.5, roughness: 0.3 })
         );
-        // Gears on sides
-        for (let i = -1; i <= 1; i += 2) {
-            const gear = new THREE.Mesh(
-                new THREE.TorusGeometry(0.3, 0.08, 8, 16),
-                new THREE.MeshPhongMaterial({ color: 0xd97706 })
-            );
-            gear.position.set(i * 0.8, 0, 0);
-            gear.rotation.y = Math.PI / 2;
-            tokenizerGroup.add(gear);
-        }
-        tokenizerGroup.add(tokenBox);
-        tokenizerGroup.position.copy(positions.tokenizer);
-        scene.add(tokenizerGroup);
+        tokenGroup.add(tbox);
+        tokenGroup.position.copy(P.tokenizer);
+        scene.add(tokenGroup);
 
-        const tokenLabel = createTextSprite('Tokenizer', '#f59e0b');
-        tokenLabel.position.set(-2, -1.8, 0);
-        scene.add(tokenLabel);
+        addLabel('Tokenizer', P.tokenizer.clone().add(new THREE.Vector3(0, -1.8, 0)), '#f59e0b');
 
-        // 3. Scheduler (purple) - Queue/Dispatcher
-        const schedulerGroup = new THREE.Group();
-        const queueBase = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.8, 0.8, 0.3, 32),
-            new THREE.MeshPhongMaterial({ color: 0x8b5cf6, shininess: 80 })
+        // 3. Scheduler (purple queue)
+        const schedGroup = new THREE.Group();
+        const sq = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.8, 0.8, 0.2, 32),
+            new THREE.MeshStandardMaterial({ color: 0x8b5cf6, metalness: 0.5, roughness: 0.3 })
         );
-        // Queue items (floating)
+        // Queue items
         for (let i = 0; i < 3; i++) {
-            const item = new THREE.Mesh(
-                new THREE.BoxGeometry(0.4, 0.3, 0.3),
-                new THREE.MeshPhongMaterial({ color: 0xa78bfa + i * 0x202020 })
+            const qitem = new THREE.Mesh(
+                new THREE.BoxGeometry(0.5, 0.25, 0.25),
+                new THREE.MeshStandardMaterial({ color: 0xa78bfa })
             );
-            item.position.set(0, 0.5 + i * 0.4, 0);
-            schedulerGroup.add(item);
+            qitem.position.y = 0.4 + i * 0.35;
+            schedGroup.add(qitem);
         }
-        schedulerGroup.add(queueBase);
-        schedulerGroup.position.copy(positions.scheduler);
-        scene.add(schedulerGroup);
+        schedGroup.add(sq);
+        schedGroup.position.copy(P.scheduler);
+        scene.add(schedGroup);
 
-        const schedLabel = createTextSprite('Scheduler', '#8b5cf6');
-        schedLabel.position.set(2, -1.8, 0);
-        scene.add(schedLabel);
+        addLabel('Scheduler', P.scheduler.clone().add(new THREE.Vector3(0, -1.8, 0)), '#8b5cf6');
 
-        // 4. GPU Inference (blue) - GPU block array
+        // 4. GPU (blue with KVCache)
         const gpuGroup = new THREE.Group();
-        // Main GPU
-        const gpuBody = new THREE.Mesh(
-            new THREE.BoxGeometry(2.5, 0.3, 1.8),
-            new THREE.MeshPhongMaterial({ color: 0x2563eb, shininess: 100 })
+        const gpubody = new THREE.Mesh(
+            new THREE.BoxGeometry(2, 0.25, 1.5),
+            new THREE.MeshStandardMaterial({ color: 0x2563eb, metalness: 0.7, roughness: 0.2 })
         );
-        gpuGroup.add(gpuBody);
+        gpuGroup.add(gpubody);
 
-        // KVCache blocks (green)
+        // KVCache blocks
         for (let i = 0; i < 4; i++) {
-            const kvBlock = new THREE.Mesh(
-                new THREE.BoxGeometry(0.4, 0.2, 0.3),
-                new THREE.MeshPhongMaterial({ color: 0x10b981, shininess: 80 })
+            const kv = new THREE.Mesh(
+                new THREE.BoxGeometry(0.35, 0.15, 0.25),
+                new THREE.MeshStandardMaterial({ color: 0x10b981, emissive: 0x10b981, emissiveIntensity: 0.2 })
             );
-            kvBlock.position.set(-0.9 + i * 0.5, 0.3, 0.5);
-            gpuGroup.add(kvBlock);
-
-            const kvBlock2 = kvBlock.clone();
-            kvBlock2.position.z = -0.5;
-            gpuGroup.add(kvBlock2);
+            kv.position.set(-0.7 + i * 0.4, 0.2, 0.4);
+            gpuGroup.add(kv);
+            const kv2 = kv.clone();
+            kv2.position.z = -0.4;
+            gpuGroup.add(kv2);
         }
-
-        // Cooling lines
-        for (let i = 0; i < 5; i++) {
-            const line = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.02, 0.02, 1.5),
-                new THREE.MeshBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.5 })
+        // Cooling vents
+        for (let i = 0; i < 4; i++) {
+            const vent = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.015, 0.015, 1.2),
+                new THREE.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.5 })
             );
-            line.position.set(-1 + i * 0.5, 0, 0);
-            line.rotation.z = Math.PI / 2;
-            gpuGroup.add(line);
+            vent.position.set(-0.75 + i * 0.45, 0, 0);
+            vent.rotation.z = Math.PI / 2;
+            gpuGroup.add(vent);
         }
-
-        // Spinning GPU indicator
-        const spinRing = new THREE.Mesh(
-            new THREE.TorusGeometry(1.2, 0.05, 16, 32),
-            new THREE.MeshBasicMaterial({ color: 0x60a5fa, transparent: true, opacity: 0.5 })
-        );
-        spinRing.position.y = 0.5;
-        spinRing.rotation.x = Math.PI / 2;
-        gpuGroup.add(spinRing);
-
-        gpuGroup.position.copy(positions.gpu);
+        gpuGroup.position.copy(P.gpu);
         scene.add(gpuGroup);
 
-        const gpuLabel = createTextSprite('GPU Instance', '#2563eb');
-        gpuLabel.position.set(6, -1.8, 0);
-        scene.add(gpuLabel);
+        addLabel('GPU + KVCache', P.gpu.clone().add(new THREE.Vector3(0, -1.8, 0)), '#2563eb');
 
-        // Data flow particles
-        const flowPaths = [
-            { from: positions.entry, to: positions.tokenizer },
-            { from: positions.tokenizer, to: positions.scheduler },
-            { from: positions.scheduler, to: positions.gpu }
+        // Flow particles
+        const paths = [
+            { from: P.entry, to: P.tokenizer, color: 0xef4444 },
+            { from: P.tokenizer, to: P.scheduler, color: 0xf59e0b },
+            { from: P.scheduler, to: P.gpu, color: 0x2563eb }
         ];
 
-        const flowParticles = [];
-        flowPaths.forEach((path, idx) => {
-            const particleCount = 50;
-            const geometry = new THREE.BufferGeometry();
-            const posArray = new Float32Array(particleCount * 3);
+        paths.forEach(p => {
+            // Line
+            const lineMat = new THREE.LineBasicMaterial({ color: p.color, transparent: true, opacity: 0.3 });
+            const lineGeo = new THREE.BufferGeometry().setFromPoints([p.from, p.to]);
+            scene.add(new THREE.Line(lineGeo, lineMat));
 
-            for (let i = 0; i < particleCount; i++) {
-                const t = i / particleCount;
-                posArray[i * 3] = THREE.MathUtils.lerp(path.from.x, path.to.x, t);
-                posArray[i * 3 + 1] = THREE.MathUtils.lerp(path.from.y, path.to.y, t) + (Math.random() - 0.5) * 0.3;
-                posArray[i * 3 + 2] = THREE.MathUtils.lerp(path.from.z, path.to.z, t) + (Math.random() - 0.5) * 0.3;
+            // Particles
+            const pcount = 30;
+            const positions = new Float32Array(pcount * 3);
+            for (let i = 0; i < pcount; i++) {
+                const t = i / pcount;
+                positions[i * 3] = THREE.MathUtils.lerp(p.from.x, p.to.x, t);
+                positions[i * 3 + 1] = THREE.MathUtils.lerp(p.from.y, p.to.y, t);
+                positions[i * 3 + 2] = THREE.MathUtils.lerp(p.from.z, p.to.z, t);
             }
-
-            geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-            const material = new THREE.PointsMaterial({
-                color: [0xef4444, 0xf59e0b, 0x2563eb][idx],
-                size: 0.1,
-                transparent: true,
-                opacity: 0.8
-            });
-            const points = new THREE.Points(geometry, material);
-            points.userData = { path, offset: Math.random() };
-            flowParticles.push(points);
-            scene.add(points);
-        });
-
-        // Connection lines
-        flowPaths.forEach((path, idx) => {
-            const points = [path.from, path.to];
-            const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
-            const lineMat = new THREE.LineBasicMaterial({
-                color: [0xef4444, 0xf59e0b, 0x2563eb][idx],
-                transparent: true,
-                opacity: 0.3
-            });
-            const line = new THREE.Line(lineGeo, lineMat);
-            scene.add(line);
+            const pgeo = new THREE.BufferGeometry();
+            pgeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const pmat = new THREE.PointsMaterial({ color: p.color, size: 0.08, transparent: true, opacity: 0.8 });
+            const pts = new THREE.Points(pgeo, pmat);
+            scene.add(pts);
         });
 
         // Lights
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-        scene.add(ambientLight);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        const l1 = new THREE.PointLight(0xffffff, 1);
+        l1.position.set(0, 5, 5);
+        scene.add(l1);
 
-        const light1 = new THREE.PointLight(0xffffff, 0.8);
-        light1.position.set(0, 5, 5);
-        scene.add(light1);
-
-        const light2 = new THREE.PointLight(0x3b82f6, 0.5);
-        light2.position.set(0, -5, 5);
-        scene.add(light2);
-
-        // Camera
-        camera.position.set(0, 2, 10);
+        camera.position.set(0, 2, 12);
         camera.lookAt(0, 0, 0);
 
-        // Resize handler
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
@@ -313,53 +217,34 @@
             requestAnimationFrame(animate);
             time += 0.016;
 
-            // Rotate nodes slightly
-            entryGroup.rotation.z = Math.sin(time) * 0.1;
-            tokenizerGroup.rotation.y += 0.02;
-            schedulerGroup.rotation.y += 0.01;
-            spinRing.rotation.z += 0.05;
+            entryGroup.rotation.z = Math.sin(time) * 0.15;
+            tokenGroup.rotation.y += 0.02;
+            schedGroup.rotation.y += 0.01;
 
-            // Animate flow particles
-            flowParticles.forEach((particles, idx) => {
-                const positions = particles.geometry.attributes.position.array;
-                for (let i = 0; i < positions.length; i += 3) {
-                    positions[i] += 0.05;
-                    if (positions[i] > positions.gpu.x) {
-                        positions[i] = positions.entry.x;
-                    }
-                }
-                particles.geometry.attributes.position.needsUpdate = true;
-            });
-
-            // KVCache blocks pulse
-            gpuGroup.children.forEach((child, i) => {
-                if (i >= 1 && i <= 4) {
-                    child.scale.y = 1 + Math.sin(time * 3 + i) * 0.1;
-                }
-            });
+            // GPU spin ring effect
+            gpuGroup.rotation.y = Math.sin(time * 2) * 0.05;
 
             controls.update();
             renderer.render(scene, camera);
         }
-
         animate();
 
-        // Helper function
-        function createTextSprite(text, color) {
+        function addLabel(text, pos, color) {
             const canvas = document.createElement('canvas');
             canvas.width = 256;
             canvas.height = 64;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = color;
-            ctx.font = 'bold 24px Arial';
+            ctx.fillStyle = '#' + color.toString(16).padStart(6, '0');
+            ctx.font = 'bold 24px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText(text, 128, 40);
 
-            const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.SpriteMaterial({ map: texture });
-            const sprite = new THREE.Sprite(material);
-            sprite.scale.set(2, 0.5, 1);
-            return sprite;
+            const tex = new THREE.CanvasTexture(canvas);
+            const mat = new THREE.SpriteMaterial({ map: tex });
+            const sprite = new THREE.Sprite(mat);
+            sprite.position.copy(pos);
+            sprite.scale.set(2.5, 0.625, 1);
+            scene.add(sprite);
         }
     </script>
 </body>
