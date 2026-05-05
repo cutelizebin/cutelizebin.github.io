@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zebin Li - Personal Homepage</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.ico">
+</head>
+<body>
+    <!-- 侧边栏导航 -->
+    <aside class="sidebar">
+        <div class="profile">
+            <img src="avatar.jpg" alt="Avatar" class="avatar">
+            <h1 class="name">Zebin Li</h1>
+            <p class="title">SJTU IPADS Lab</p>
+        </div>
+
+        <nav class="nav">
+            <a href="#about" class="nav-link">About</a>
+            <a href="#news" class="nav-link">Timeline</a>
+            <a href="#projects" class="nav-link">Projects</a>
+            <a href="#blog" class="nav-link">Blog</a>
+            <a href="#contact" class="nav-link">Contact</a>
+        </nav>
+
+        <div class="social">
+            <a href="https://github.com/cutelizebin" target="_blank">GitHub</a>
+            <a href="https://x.com/Zebin_Li98" target="_blank">X</a>
+            <a href="index.html">中文</a>
+        </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main">
+        <!-- About -->
+        <section id="about" class="section">
+            <h2>About Me</h2>
+            <p>
+                I am currently working at <strong>MiniMax</strong> as an LLM Inference Infra Engineer,
+                focusing on KVCache storage and scheduling optimization.
+            </p>
+            <p>
+                Previously, I worked on Kata Container secure container virtualization in ByteDance's DPU department.
+            </p>
+            <p>
+                I completed my master's at <strong>SJTU IPADS Lab</strong>, advised by Prof. Haibo Chen and Prof. Yubin Xia.
+            </p>
+            <p>
+                <strong>Tech Stack:</strong> C / Rust / vLLM / Sglang / Linux / QEMU / KVM / rust-vmm
+            </p>
+        </section>
+
+        <!-- News -->
+        <section id="news" class="section">
+            <h2>Timeline</h2>
+            <ul class="news-list">
+                <li>
+                    <span class="date">2025.10 - Present</span>
+                    MiniMax | LLM Inference Infra Engineer
+                    <p>KVCache storage and scheduling optimization</p>
+                </li>
+                <li>
+                    <span class="date">2023.03 - 2025.10</span>
+                    ByteDance | Secure Container Virtualization Engineer
+                    <p>Volcengine DPU Kata Container secure container virtualization lead</p>
+                </li>
+                <li>
+                    <span class="date">2020.09 - 2023.03</span>
+                    Shanghai Jiao Tong University | Master
+                    <p>IPADS Lab | Advisor: Prof. Haibo Chen, Prof. Yubin Xia</p>
+                </li>
+                <li>
+                    <span class="date">2016.09 - 2020.06</span>
+                    Nanjing University | Bachelor
+                    <p>Software School</p>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Projects -->
+        <section id="projects" class="section">
+            <h2>Projects</h2>
+            <ul class="project-list">
+                <li>
+                    <strong>KVCache Management System</strong>
+                    <p>Core developer of KVCache L2, enabling KVCache-aware scheduling for MiniMax inference service, saving thousands of GPUs.</p>
+                </li>
+                <li>
+                    <strong>KVCache Simulator</strong>
+                    <p>Estimates KVCache capacity for specific models, evaluates KVCache-aware scheduling algorithms, saving test GPU time.</p>
+                </li>
+                <li>
+                    <strong>DPU Kata Runtime Offloading</strong>
+                    <p>Completed QEMU Kata Container virtualization offloading to DPU, optimizing for high-density deployment and concurrent startup, improving deployment density by 1x.</p>
+                </li>
+                <li>
+                    <strong>Titanium: Lightweight ARM TrustZone VMM</strong>
+                    <p>Implemented lightweight VMM in TrustZone using ARMv8.4 SEL2 features, collaborated with Huawei HiSilicon, in both C and Rust.</p>
+                </li>
+                <li>
+                    <strong>Cloud IOMMU Performance Optimization</strong>
+                    <p>Researched and optimized IOMMU PageTable NUMA allocation issues in SRIOV + VFIO方案。</p>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Blog -->
+        <section id="blog" class="section">
+            <h2>Blog</h2>
+            <p><em>Coming soon...</em></p>
+        </section>
+
+        <!-- Contact -->
+        <section id="contact" class="section">
+            <h2>Contact</h2>
+            <p>Email: <a href="mailto:hellolizebin@foxmail.com">hellolizebin@foxmail.com</a></p>
+            <p>Location: Shanghai, China</p>
+        </section>
+    </main>
+</body>
+</html>
