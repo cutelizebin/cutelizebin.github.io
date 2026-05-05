@@ -15,6 +15,29 @@
         .back { margin-bottom: 32px; }
         .back a { color: #2563eb; text-decoration: none; }
         .back a:hover { text-decoration: underline; }
+        .highlight {
+            background: #dbeafe;
+            border: 2px solid #2563eb;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+            text-align: center;
+        }
+        .highlight .number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        .highlight .label {
+            font-size: 18px;
+            color: #666;
+            margin-top: 8px;
+        }
+        .highlight .sub {
+            font-size: 16px;
+            color: #666;
+            margin-top: 16px;
+        }
         ul, ol { padding-left: 24px; }
         li { margin-bottom: 8px; }
         code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
@@ -30,6 +53,20 @@
     </div>
 
     <h1>DeepSeek-V4-Pro: KVCache Size Per Token</h1>
+
+    <div class="highlight">
+        <div class="number">10.2 KB/token</div>
+        <div class="label">KVCache Size Per Token</div>
+        <div class="sub">1M context ≈ 10.9 MB · 24x compression vs BF16 GQA8</div>
+    </div>
+
+    <h2>Conclusion</h2>
+    <ul>
+        <li><strong>KVCache per token: 10.2 KB</strong></li>
+        <li>1M context total: ≈ 10.9 MB</li>
+        <li>vs BF16 GQA8 baseline (single layer 4,096 bytes/token): <strong>24x compression</strong></li>
+        <li>With FP4 indexer: up to <strong>31x</strong>, close to paper's 2% claim</li>
+    </ul>
 
     <h2>Key Parameters</h2>
     <table>
@@ -57,18 +94,18 @@
 
     <h3>1. SWA (Sliding Window, Fixed Cache Amortization)</h3>
     <pre>SWA fixed cache = 61 layers × 128 pairs × 1,152 bytes = 8,994,816 bytes
-SWA per token (1M context) = 8,994,816 / 1,048,576 = <strong>9.0 bytes</strong></pre>
+SWA per token (1M context) = 8,994,816 / 1,048,576 = 9.0 bytes</pre>
 
     <h3>2. HCA (31 layers)</h3>
     <pre>HCA per token per layer = 1,152 / 128 = 9 bytes
-HCA total = 31 × 9 = <strong>279 bytes/token</strong></pre>
+HCA total = 31 × 9 = 279 bytes/token</pre>
 
     <h3>3. CSA (30 layers)</h3>
     <pre>CSA main KV per token per layer = 1,152 / 4 = 288 bytes
 Indexer key size = 64 × 2 + (128 - 64) × 1 = 192 bytes
 CSA indexer key per token per layer = 192 / 4 = 48 bytes
 Per CSA layer total = 288 + 48 = 336 bytes/token
-CSA total = 30 × 336 = <strong>10,080 bytes/token</strong></pre>
+CSA total = 30 × 336 = 10,080 bytes/token</pre>
 
     <h2>Summary</h2>
     <table>
@@ -77,16 +114,8 @@ CSA total = 30 × 336 = <strong>10,080 bytes/token</strong></pre>
         <tr><td>HCA</td><td>279 bytes</td><td>2.69%</td></tr>
         <tr><td>CSA main KV</td><td>8,640 bytes</td><td>83.33%</td></tr>
         <tr><td>CSA indexer key</td><td>1,440 bytes</td><td>13.89%</td></tr>
-        <tr><td><strong>Total</strong></td><td><strong>~10,368 bytes ~10.2 KB/token</strong></td><td>100%</td></tr>
+        <tr><td><strong>Total</strong></td><td><strong>10,368 bytes ≈ 10.2 KB/token</strong></td><td>100%</td></tr>
     </table>
-
-    <p>1M context total KV Cache: 10,368 × 1,048,576 ≈ <strong>10.9 MB</strong></p>
-
-    <h2>Key Validations</h2>
-    <ul>
-        <li>vs BF16 GQA8 baseline (single layer 4,096 bytes/token): V4-Pro avg ~170 bytes → <strong>24x compression</strong>, can reach 31x with FP4 indexer, close to paper's 2% claim</li>
-        <li>vs DeepSeek-V3.2: V4-Pro is 10% → V3.2 ≈ 101 KB/token</li>
-    </ul>
 
     <h2>Core Formulas</h2>
     <pre>single_kv_pair_size = 2 × (rope_dim × 2 + (head_dim - rope_dim) × 1)
