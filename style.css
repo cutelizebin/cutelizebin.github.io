@@ -192,41 +192,41 @@ body {
     margin-bottom: 4px;
 }
 
-/* 支线事件 - 树枝样式 */
+/* 支线事件 - 树枝分叉样式 */
 .news-list .sub-event {
-    margin-top: 12px;
-    padding: 12px 0 12px 20px;
-    border-left: 2px solid var(--border-color);
+    margin-top: 8px;
+    padding: 8px 0 8px 24px;
     position: relative;
-    border-top: 2px solid var(--border-color);
-    width: calc(100% - 20px);
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-left: -8px;
 }
 
 .news-list .sub-event::before {
     content: '';
     position: absolute;
-    left: -2px;
-    top: 0;
-    width: 20px;
-    height: 2px;
+    left: 8px;
+    top: -8px;
+    width: 2px;
+    height: 8px;
     background: var(--border-color);
 }
 
 .news-list .sub-event::after {
     content: '';
     position: absolute;
-    left: -2px;
-    top: 12px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--accent-color);
+    left: 0;
+    top: -4px;
+    width: 16px;
+    height: 2px;
+    background: var(--border-color);
 }
 
 .news-list .sub-event .date {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--accent-color);
-    font-weight: 500;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
 .news-list .sub-event p {
@@ -237,6 +237,9 @@ body {
 
 .news-list .sub-event a {
     color: var(--accent-color);
+    text-decoration: none;
+    font-size: 12px;
+}
     text-decoration: none;
     font-size: 12px;
 }
