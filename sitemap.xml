@@ -31,6 +31,16 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://cutelizebin.github.io/blog-dv4-pro-kvcache.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://cutelizebin.github.io/blog-dv4-pro-kvcache-en.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://cutelizebin.github.io/KVCache%20Practices%20at%20MiniMax%20for%20Agentic%20Workloads%20From%20Traffic%20Characteristics%20to%20Architectural%20Insights.pdf</loc>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>

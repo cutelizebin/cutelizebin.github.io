@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepSeek-V4-Pro: KVCache Size Per Token</title>
+    <meta name="description" content="DeepSeek-V4-Pro KVCache size calculation, core formulas and derivation">
+    <link rel="stylesheet" href="style.css">
+    <link rel="canonical" href="https://cutelizebin.github.io/blog-dv4-pro-kvcache-en.html">
+    <style>
+        body { padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.8; }
+        h1 { margin-bottom: 24px; }
+        h2 { margin-top: 32px; margin-bottom: 16px; }
+        h3 { margin-top: 24px; margin-bottom: 12px; }
+        .back { margin-bottom: 32px; }
+        .back a { color: #2563eb; text-decoration: none; }
+        .back a:hover { text-decoration: underline; }
+        ul, ol { padding-left: 24px; }
+        li { margin-bottom: 8px; }
+        code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
+        pre { background: #f3f4f6; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 16px 0; }
+        table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+        th, td { border: 1px solid #e5e7eb; padding: 8px 12px; text-align: left; }
+        th { background: #f3f4f6; }
+    </style>
+</head>
+<body>
+    <div class="back">
+        <a href="index-en.html">← Back to Home</a>
+    </div>
+
+    <h1>DeepSeek-V4-Pro: KVCache Size Per Token</h1>
+
+    <h2>Key Parameters</h2>
+    <table>
+        <tr><th>Parameter</th><th>Value</th></tr>
+        <tr><td>head_dim</td><td>512</td></tr>
+        <tr><td>qk_rope_head_dim</td><td>64</td></tr>
+        <tr><td>num_key_value_heads</td><td>1</td></tr>
+        <tr><td>num_hidden_layers</td><td>61</td></tr>
+        <tr><td>sliding_window</td><td>128</td></tr>
+    </table>
+
+    <h3>Compression Strategy</h3>
+    <p>First 2 layers = 128 (HCA), then alternating: even index = 4 (CSA), odd index = 128 (HCA)</p>
+    <p>Layer count: HCA = 31 layers, CSA = 30 layers</p>
+
+    <h2>Single KV Pair Size (Mixed Precision)</h2>
+    <ul>
+        <li>RoPE part: 64 dims × 2 bytes (BF16) = 128 bytes</li>
+        <li>Non-RoPE part: (512 - 64) = 448 dims × 1 byte (FP8) = 448 bytes</li>
+        <li>Single Key or Value = 128 + 448 = 576 bytes</li>
+        <li>One KV pair (MQA, 1 group) = 576 × 2 = <strong>1,152 bytes</strong></li>
+    </ul>
+
+    <h2>Component Calculations</h2>
+
+    <h3>1. SWA (Sliding Window, Fixed Cache Amortization)</h3>
+    <pre>SWA fixed cache = 61 layers × 128 pairs × 1,152 bytes = 8,994,816 bytes
+SWA per token (1M context) = 8,994,816 / 1,048,576 = <strong>9.0 bytes</strong></pre>
+
+    <h3>2. HCA (31 layers)</h3>
+    <pre>HCA per token per layer = 1,152 / 128 = 9 bytes
+HCA total = 31 × 9 = <strong>279 bytes/token</strong></pre>
+
+    <h3>3. CSA (30 layers)</h3>
+    <pre>CSA main KV per token per layer = 1,152 / 4 = 288 bytes
+Indexer key size = 64 × 2 + (128 - 64) × 1 = 192 bytes
+CSA indexer key per token per layer = 192 / 4 = 48 bytes
+Per CSA layer total = 288 + 48 = 336 bytes/token
+CSA total = 30 × 336 = <strong>10,080 bytes/token</strong></pre>
+
+    <h2>Summary</h2>
+    <table>
+        <tr><th>Component</th><th>Per Token</th><th>Share</th></tr>
+        <tr><td>SWA @ 1M</td><td>9.0 bytes</td><td>0.09%</td></tr>
+        <tr><td>HCA</td><td>279 bytes</td><td>2.69%</td></tr>
+        <tr><td>CSA main KV</td><td>8,640 bytes</td><td>83.33%</td></tr>
+        <tr><td>CSA indexer key</td><td>1,440 bytes</td><td>13.89%</td></tr>
+        <tr><td><strong>Total</strong></td><td><strong>~10,368 bytes ~10.2 KB/token</strong></td><td>100%</td></tr>
+    </table>
+
+    <p>1M context total KV Cache: 10,368 × 1,048,576 ≈ <strong>10.9 MB</strong></p>
+
+    <h2>Key Validations</h2>
+    <ul>
+        <li>vs BF16 GQA8 baseline (single layer 4,096 bytes/token): V4-Pro avg ~170 bytes → <strong>24x compression</strong>, can reach 31x with FP4 indexer, close to paper's 2% claim</li>
+        <li>vs DeepSeek-V3.2: V4-Pro is 10% → V3.2 ≈ 101 KB/token</li>
+    </ul>
+
+    <h2>Core Formulas</h2>
+    <pre>single_kv_pair_size = 2 × (rope_dim × 2 + (head_dim - rope_dim) × 1)
+swa_per_token = (n_layers × sliding_window × kv_pair_size) / seq_len
+hca_per_token = hca_layers × (kv_pair_size / 128)
+csa_per_token = csa_layers × (kv_pair_size / 4 + indexer_key_size / 4)
+total = SWA + HCA + CSA</pre>
+
+    <div class="back">
+        <a href="index-en.html">← Back to Home</a>
+    </div>
+</body>
+</html>
