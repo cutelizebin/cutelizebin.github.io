@@ -192,38 +192,53 @@ body {
     margin-bottom: 4px;
 }
 
-/* 支线事件 */
+/* 支线事件 - 树枝样式 */
 .news-list .sub-event {
-    margin-top: 8px;
-    padding: 8px 0 8px 16px;
-    border-left: 1px dashed var(--border-color);
+    margin-top: 12px;
+    padding: 12px 0 12px 20px;
+    border-left: 2px solid var(--border-color);
     position: relative;
+    border-top: 2px solid var(--border-color);
+    width: calc(100% - 20px);
 }
 
 .news-list .sub-event::before {
     content: '';
     position: absolute;
-    left: -1px;
-    top: 14px;
-    width: 6px;
-    height: 6px;
+    left: -2px;
+    top: 0;
+    width: 20px;
+    height: 2px;
+    background: var(--border-color);
+}
+
+.news-list .sub-event::after {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 12px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    background: var(--text-light);
+    background: var(--accent-color);
 }
 
 .news-list .sub-event .date {
     font-size: 12px;
-    color: var(--text-light);
+    color: var(--accent-color);
+    font-weight: 500;
 }
 
 .news-list .sub-event p {
     font-size: 13px;
     margin-top: 4px;
+    color: var(--text-color);
 }
 
 .news-list .sub-event a {
     color: var(--accent-color);
     text-decoration: none;
+    font-size: 12px;
 }
 
 .news-list .sub-event a:hover {
