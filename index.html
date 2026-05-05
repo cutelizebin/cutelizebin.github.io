@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>李泽斌 - 个人主页</title>
+    <meta name="description" content="李泽斌的个人主页 - MiniMax LLM推理Infra工程师，IPADS实验室硕士">
+    <meta name="keywords" content="李泽斌,KVCache,虚拟化,MiniMax,IPADS,上海交通大学">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="favicon.ico">
+    <link rel="icon" href="avatar.jpg">
 </head>
 <body>
     <!-- 侧边栏导航 -->
@@ -130,5 +132,38 @@
             <p>所在地：上海，中国</p>
         </section>
     </main>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="返回顶部">↑</button>
+    <style>
+        #back-to-top {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 40px;
+            height: 40px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: none;
+            z-index: 1000;
+        }
+        #back-to-top:hover {
+            opacity: 0.8;
+        }
+    </style>
+    <script>
+        window.addEventListener('scroll', function() {
+            var btn = document.getElementById('back-to-top');
+            if (window.scrollY > 300) {
+                btn.style.display = 'block';
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

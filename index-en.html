@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zebin Li - Personal Homepage</title>
+    <meta name="description" content="Zebin Li's personal homepage - MiniMax LLM Inference Infra Engineer, IPADS Lab Master">
+    <meta name="keywords" content="Zebin Li,KVCache,virtualization,MiniMax,IPADS,Shanghai Jiao Tong University">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="favicon.ico">
+    <link rel="icon" href="avatar.jpg">
 </head>
 <body>
     <!-- 侧边栏导航 -->
@@ -131,5 +133,38 @@
             <p>Location: Shanghai, China</p>
         </section>
     </main>
+
+    <!-- Back to Top -->
+    <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Back to Top">↑</button>
+    <style>
+        #back-to-top {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 40px;
+            height: 40px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: none;
+            z-index: 1000;
+        }
+        #back-to-top:hover {
+            opacity: 0.8;
+        }
+    </style>
+    <script>
+        window.addEventListener('scroll', function() {
+            var btn = document.getElementById('back-to-top');
+            if (window.scrollY > 300) {
+                btn.style.display = 'block';
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
