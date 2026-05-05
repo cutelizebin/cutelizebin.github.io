@@ -14,7 +14,7 @@
     --border-color: #e5e7eb;
     --hover-color: #f3f4f6;
     --sidebar-width: 240px;
-    --content-max-width: 700px;
+    --content-max-width: 850px;
 }
 
 body {
@@ -113,7 +113,7 @@ body {
 /* 主内容区 */
 .main {
     margin-left: var(--sidebar-width);
-    padding: 48px 64px;
+    padding: 48px 80px;
     max-width: var(--content-max-width);
 }
 
