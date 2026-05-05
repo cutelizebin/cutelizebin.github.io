@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KVCache 存储 - 项目详情</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.ico">
+    <style>
+        body {
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        h1 { margin-bottom: 24px; }
+        h2 { margin-top: 32px; margin-bottom: 16px; }
+        .back { margin-bottom: 32px; }
+        .back a { color: #2563eb; text-decoration: none; }
+        .back a:hover { text-decoration: underline; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+    <div class="back">
+        <a href="index.html">← 返回主页</a>
+    </div>
+
+    <h1>KVCache 存储</h1>
+
+    <h2>项目目标</h2>
+    <p>
+        统一管理 DRAM/SSD 上的 KVCache，作为独立的组件 daemon，与推理框架（vLLM/sglang/MiniMax 内部框架）解耦，同时上报 KVCache metadata 给调度器做 KVCache-aware 调度。
+    </p>
+
+    <h2>核心功能</h2>
+    <ul>
+        <li>统一管理 DRAM + SSD 上的 KVCache</li>
+        <li>作为独立 daemon 运行，与推理框架解耦</li>
+        <li>KVCache metadata 上报，供调度器做感知调度</li>
+    </ul>
+
+    <h2>技术架构</h2>
+    <ul>
+        <li>**独立 Daemon**：KVCache 存储作为独立组件，不依赖推理框架</li>
+        <li>**多级存储**：支持 DRAM 和 SSD 两级 KVCache 存储</li>
+        <li>**Metadata 上报**：上报 KVCache 元数据给调度器</li>
+        <li>**框架兼容**：vLLM、Sglang、MiniMax 内部推理框架</li>
+    </ul>
+
+    <h2>成果</h2>
+    <ul>
+        <li>节约上千卡成本</li>
+        <li>支持多种推理框架</li>
+        <li>实现 KVCache 感知调度</li>
+    </ul>
+
+    <div class="back">
+        <a href="index.html">← 返回主页</a>
+    </div>
+</body>
+</html>

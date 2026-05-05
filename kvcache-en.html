@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KVCache Storage - Project Details</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.ico">
+    <style>
+        body {
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        h1 { margin-bottom: 24px; }
+        h2 { margin-top: 32px; margin-bottom: 16px; }
+        .back { margin-bottom: 32px; }
+        .back a { color: #2563eb; text-decoration: none; }
+        .back a:hover { text-decoration: underline; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+    <div class="back">
+        <a href="index-en.html">← Back to Home</a>
+    </div>
+
+    <h1>KVCache Storage</h1>
+
+    <h2>Goal</h2>
+    <p>
+        Unified management of KVCache on DRAM/SSD, as an independent daemon, decoupled from inference frameworks (vLLM/sglang/MiniMax internal framework), while reporting KVCache metadata to scheduler for KVCache-aware scheduling.
+    </p>
+
+    <h2>Core Features</h2>
+    <ul>
+        <li>Unified management of KVCache on DRAM + SSD</li>
+        <li>Independent daemon, decoupled from inference frameworks</li>
+        <li>KVCache metadata reporting to scheduler for KVCache-aware scheduling</li>
+    </ul>
+
+    <h2>Architecture</h2>
+    <ul>
+        <li><strong>Independent Daemon</strong>: KVCache storage as independent component, not dependent on inference framework</li>
+        <li><strong>Multi-tier Storage</strong>: Supports DRAM and SSD two-tier KVCache storage</li>
+        <li><strong>Metadata Reporting</strong>: Reports KVCache metadata to scheduler</li>
+        <li><strong>Framework Compatibility</strong>: vLLM, Sglang, MiniMax internal framework</li>
+    </ul>
+
+    <h2>Results</h2>
+    <ul>
+        <li>Saved thousands of GPUs</li>
+        <li>Supports multiple inference frameworks</li>
+        <li>Enables KVCache-aware scheduling</li>
+    </ul>
+
+    <div class="back">
+        <a href="index-en.html">← Back to Home</a>
+    </div>
+</body>
+</html>
