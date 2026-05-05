@@ -144,6 +144,25 @@ body {
     font-size: 14px;
 }
 
+/* Knowledge Base button */
+.section .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--accent-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.section .btn:hover {
+    opacity: 0.9;
+    text-decoration: none;
+}
+
 /* 主内容区 */
 .main {
     margin-left: var(--sidebar-width);
