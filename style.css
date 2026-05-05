@@ -81,6 +81,16 @@ body {
     background: var(--hover-color);
 }
 
+.lang-switch a.active {
+    background: var(--accent-color);
+    color: white;
+}
+
+.lang-switch .divider {
+    margin: 0 4px;
+    color: var(--text-light);
+}
+
 /* 导航 */
 .nav {
     display: flex;
