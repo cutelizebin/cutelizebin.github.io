@@ -123,25 +123,17 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
       });
     }
 
-    // Active section highlight
-    var sections = document.querySelectorAll('.section');
+    // Active section highlight based on URL hash
     var navLinks = document.querySelectorAll('.nav-link');
     function updateActive() {
-      var current = '';
-      sections.forEach(function(s) {
-        var top = s.getBoundingClientRect().top;
-        if (top < window.innerHeight / 2) {
-          current = s.id;
-        }
-      });
+      var hash = window.location.hash || (navLinks.length ? navLinks[0].getAttribute('href').replace('#', '#') : '');
       navLinks.forEach(function(link) {
-        link.classList.toggle('active', link.dataset.section === current);
+        var target = '#' + link.dataset.section;
+        link.classList.toggle('active', target === hash);
       });
     }
-    if (sections.length) {
-      window.addEventListener('scroll', updateActive);
-      updateActive();
-    }
+    window.addEventListener('hashchange', updateActive);
+    updateActive();
 
     // Back to top
     window.addEventListener('scroll', function() {
