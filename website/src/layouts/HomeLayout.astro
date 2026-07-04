@@ -180,17 +180,20 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
     }
 
     :root {
-      --bg: #0a0a0a;
-      --sidebar-bg: #0d0d0d;
-      --text: #e8e8e8;
-      --text-light: #888888;
-      --accent: #10b981;
-      --accent-dim: #065f46;
-      --border: #1a1a1a;
-      --hover: #141414;
-      --card-bg: #111111;
+      --bg: #f9fafb;
+      --sidebar-bg: #f2f3f7;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --accent: #2563eb;
+      --accent-light: #dbeafe;
+      --border: #e2e8f0;
+      --hover: #eef2ff;
+      --card-bg: #ffffff;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-hover: 0 4px 12px rgba(0,0,0,0.08);
       --sidebar-width: 240px;
       --content-max-width: 960px;
+      --radius: 12px;
     }
 
     html {
@@ -239,6 +242,7 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
       width: 22px;
       height: 2px;
       background: var(--text);
+      border-radius: 2px;
       transition: transform 0.3s, opacity 0.3s;
     }
 
@@ -257,34 +261,26 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
     }
 
     .avatar {
-      width: 90px;
-      height: 90px;
+      width: 96px;
+      height: 96px;
       border-radius: 50%;
       object-fit: cover;
       margin-bottom: 12px;
-      border: 2px solid var(--border);
-      filter: grayscale(30%);
-      transition: filter 0.3s;
-    }
-
-    .avatar:hover {
-      filter: grayscale(0%);
+      border: 3px solid white;
+      box-shadow: var(--shadow);
     }
 
     .name {
-      font-size: 17px;
-      font-weight: 600;
+      font-size: 18px;
+      font-weight: 700;
       color: var(--text);
       letter-spacing: -0.01em;
     }
 
     .title {
-      font-size: 12px;
-      color: var(--accent);
+      font-size: 13px;
+      color: var(--text-light);
       margin-top: 2px;
-      font-weight: 500;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
     }
 
     .lang-switch {
@@ -293,28 +289,28 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
     }
 
     .lang-switch a {
-      font-size: 11px;
-      color: var(--text-light);
+      font-size: 12px;
+      color: var(--accent);
       text-decoration: none;
-      padding: 3px 10px;
+      padding: 4px 10px;
       border: 1px solid var(--border);
+      border-radius: 6px;
       transition: all 0.2s;
     }
 
     .lang-switch a:hover {
-      color: var(--accent);
-      border-color: var(--accent);
+      background: var(--hover);
     }
 
     .lang-switch a.active {
       background: var(--accent);
-      color: #0a0a0a;
+      color: white;
       border-color: var(--accent);
     }
 
     .lang-switch .divider {
       margin: 0 4px;
-      color: var(--border);
+      color: var(--text-light);
     }
 
     .nav {
@@ -325,115 +321,124 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
 
     .nav-link {
       display: block;
-      padding: 6px 12px;
+      padding: 8px 14px;
+      border-radius: 8px;
       text-decoration: none;
       color: var(--text-light);
-      font-size: 13px;
-      font-weight: 400;
+      font-size: 14px;
+      font-weight: 500;
       transition: all 0.2s;
-      border-left: 2px solid transparent;
     }
 
     .nav-link:hover {
-      color: var(--text);
-      border-left-color: var(--text-light);
+      background: var(--hover);
+      color: var(--accent);
     }
 
     .nav-link.active {
-      color: var(--accent);
-      border-left-color: var(--accent);
-      font-weight: 500;
+      background: var(--accent);
+      color: white;
     }
 
     .social {
       margin-top: auto;
       display: flex;
-      gap: 6px;
+      gap: 10px;
       justify-content: center;
       flex-wrap: wrap;
       padding-top: 24px;
     }
 
     .social a {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--text-light);
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 4px 8px;
+      padding: 6px 10px;
+      border-radius: 8px;
       transition: all 0.2s;
     }
 
     .social a:hover {
       color: var(--accent);
+      background: var(--hover);
     }
 
     .social .fa-brands {
-      font-size: 13px;
+      font-size: 14px;
     }
 
     .main {
       margin-left: var(--sidebar-width);
-      padding: 40px 48px;
+      padding: 48px 48px;
       max-width: var(--content-max-width);
     }
 
     .section {
-      margin-bottom: 20px;
-      padding: 24px 0;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.3s;
+    }
+
+    .section:hover {
+      box-shadow: var(--shadow-hover);
     }
 
     .section:target {
-      border-left: 3px solid var(--accent);
-      padding-left: 24px;
+      box-shadow: 0 0 0 2px var(--accent), var(--shadow-hover);
     }
 
     .section h2 {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--accent);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
       margin-bottom: 20px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .section p {
       margin-bottom: 12px;
       color: var(--text);
       font-size: 15px;
-      line-height: 1.8;
+      line-height: 1.75;
     }
 
     .section a {
       color: var(--accent);
       text-decoration: none;
-      border-bottom: 1px solid transparent;
-      transition: border-color 0.2s;
     }
 
     .section a:hover {
-      border-bottom-color: var(--accent);
+      text-decoration: underline;
     }
 
     .section .btn {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 20px;
-      background: transparent;
-      color: var(--accent);
+      padding: 10px 24px;
+      background: var(--accent);
+      color: white;
       text-decoration: none;
+      border-radius: 8px;
       font-weight: 500;
-      font-size: 13px;
-      border: 1px solid var(--accent);
+      font-size: 14px;
       transition: all 0.2s;
     }
 
     .section .btn:hover {
-      background: var(--accent);
-      color: #0a0a0a;
-      border-bottom-color: var(--accent);
+      opacity: 0.9;
+      text-decoration: none;
+      box-shadow: var(--shadow);
     }
 
     .news-list {
@@ -442,10 +447,10 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
     }
 
     .news-list li {
-      padding: 14px 0 14px 20px;
-      border-left: 1px solid var(--border);
+      padding: 14px 0 14px 24px;
+      border-left: 2px solid var(--border);
       position: relative;
-      margin-left: 8px;
+      margin-left: 10px;
     }
 
     .news-list li:last-child {
@@ -455,35 +460,39 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
     .news-list li::before {
       content: '';
       position: absolute;
-      left: -4px;
+      left: -7px;
       top: 20px;
-      width: 7px;
-      height: 7px;
-      background: var(--accent);
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      box-shadow: 0 0 0 2px white;
     }
 
     .news-list .date {
-      color: var(--text-light);
+      color: var(--accent);
       font-size: 12px;
+      font-weight: 600;
       display: block;
       margin-bottom: 4px;
-      font-family: "SF Mono", "Fira Code", monospace;
+      letter-spacing: 0.02em;
     }
 
     .news-list .sub-event {
       margin-top: 8px;
-      padding: 10px 0 10px 24px;
+      padding: 10px 0 10px 28px;
       position: relative;
-      background: var(--card-bg);
-      margin-left: -6px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-left: -8px;
     }
 
     .news-list .sub-event::before {
       content: '';
       position: absolute;
-      left: 8px;
+      left: 10px;
       top: -8px;
-      width: 1px;
+      width: 2px;
       height: 8px;
       background: var(--border);
     }
@@ -493,15 +502,15 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
       position: absolute;
       left: 0;
       top: -4px;
-      width: 16px;
-      height: 1px;
+      width: 18px;
+      height: 2px;
       background: var(--border);
     }
 
     .news-list .sub-event .date {
-      font-size: 10px;
+      font-size: 11px;
       color: var(--accent);
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .news-list .sub-event p {
@@ -520,8 +529,10 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
     .project-list li {
       padding: 14px 0;
       border-bottom: 1px solid var(--border);
-      transition: all 0.2s;
-      padding: 12px 0;
+      transition: background 0.2s;
+      margin: 0 -12px;
+      padding: 12px 12px;
+      border-radius: 8px;
     }
 
     .project-list li:last-child {
@@ -529,8 +540,7 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
     }
 
     .project-list li:hover {
-      padding-left: 12px;
-      border-left: 2px solid var(--accent);
+      background: var(--bg);
     }
 
     .project-list p {
@@ -544,21 +554,23 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
       position: fixed;
       bottom: 24px;
       right: 24px;
-      width: 36px;
-      height: 36px;
-      background: transparent;
-      color: var(--text-light);
-      border: 1px solid var(--border);
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 50%;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 18px;
       display: none;
       z-index: 1000;
+      box-shadow: var(--shadow);
       transition: all 0.2s;
     }
 
     #back-to-top:hover {
-      color: var(--accent);
-      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
     }
 
     @media (max-width: 768px) {
@@ -568,8 +580,8 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
         height: auto;
         border-right: none;
         border-bottom: 1px solid var(--border);
-        padding: 10px 16px;
-        background: rgba(10, 10, 10, 0.98);
+        padding: 12px 16px;
+        background: rgba(242, 243, 247, 0.98);
         backdrop-filter: blur(8px);
       }
 
@@ -582,19 +594,18 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
       .profile {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
       }
 
       .avatar {
-        width: 36px;
-        height: 36px;
+        width: 40px;
+        height: 40px;
         margin-bottom: 0;
-        border-width: 1px;
-        filter: grayscale(0%);
+        border-width: 2px;
       }
 
       .name {
-        font-size: 15px;
+        font-size: 16px;
         margin-bottom: 0;
       }
 
@@ -609,8 +620,8 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
       }
 
       .lang-switch a {
-        font-size: 10px;
-        padding: 2px 6px;
+        font-size: 11px;
+        padding: 2px 8px;
       }
 
       .lang-switch .divider {
@@ -624,11 +635,11 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
       .sidebar-body {
         display: none;
         position: fixed;
-        top: 57px;
+        top: 65px;
         left: 0;
         width: 100%;
-        height: calc(100vh - 57px);
-        background: rgba(10, 10, 10, 0.98);
+        height: calc(100vh - 65px);
+        background: rgba(242, 243, 247, 0.98);
         backdrop-filter: blur(8px);
         padding: 16px 20px;
         overflow-y: auto;
@@ -643,8 +654,8 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
       }
 
       .nav-link {
-        padding: 10px 12px;
-        font-size: 15px;
+        padding: 12px 16px;
+        font-size: 16px;
       }
 
       .social {
@@ -655,17 +666,16 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
 
       .main {
         margin-left: 0;
-        padding: 72px 16px 24px;
+        padding: 80px 16px 24px;
       }
 
       .section {
-        padding: 16px 0;
-        margin-bottom: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
       }
 
       .section h2 {
-        font-size: 12px;
-        margin-bottom: 14px;
+        font-size: 18px;
       }
     }
   </style>
