@@ -63,42 +63,87 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
   })}></script>
 </head>
 <body>
-  <aside class="sidebar">
-    <div class="profile">
-      <img src="/avatar.jpg" alt={isEn ? "Avatar" : "头像"} class="avatar" width="100" height="100">
-      <h1 class="name">{isEn ? "Zebin Li" : "李泽斌"}</h1>
-      <p class="title">ENFJ</p>
-      <p class="lang-switch">
-        <a href={enHref} class={isEn ? "active" : ""}>English</a>
-        <span class="divider">|</span>
-        <a href={zhHref} class={isEn ? "" : "active"}>中文</a>
-      </p>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="profile">
+        <img src="/avatar.jpg" alt={isEn ? "Avatar" : "头像"} class="avatar" width="100" height="100">
+        <h1 class="name">{isEn ? "Zebin Li" : "李泽斌"}</h1>
+        <p class="title">ENFJ</p>
+        <p class="lang-switch">
+          <a href={enHref} class={isEn ? "active" : ""}>English</a>
+          <span class="divider">|</span>
+          <a href={zhHref} class={isEn ? "" : "active"}>中文</a>
+        </p>
+      </div>
+      <button class="menu-toggle" id="menuToggle" aria-label={isEn ? "Toggle menu" : "切换菜单"}>
+        <span></span><span></span><span></span>
+      </button>
     </div>
 
-    <nav class="nav">
-      <a href={isEn ? "/en/#about" : "#about"} class="nav-link">{isEn ? "About" : "关于"}</a>
-      <a href={isEn ? "/en/#activity" : "#activity"} class="nav-link">{isEn ? "Activity" : "活动"}</a>
-      <a href={isEn ? "/en/#news" : "#news"} class="nav-link">{isEn ? "Timeline" : "时间线"}</a>
-      <a href={isEn ? "/en/#projects" : "#projects"} class="nav-link">{isEn ? "Projects" : "项目"}</a>
-      <a href={isEn ? "/en/#blog" : "#blog"} class="nav-link">{isEn ? "Blog" : "博客"}</a>
-      <a href={isEn ? "/en/#knowledge" : "#knowledge"} class="nav-link">{isEn ? "Knowledge" : "知识库"}</a>
-      <a href={isEn ? "/en/#contact" : "#contact"} class="nav-link">{isEn ? "Contact" : "联系"}</a>
-    </nav>
+    <div class="sidebar-body" id="sidebarBody">
+      <nav class="nav">
+        <a href={isEn ? "/en/#about" : "#about"} class="nav-link" data-section="about">{isEn ? "About" : "关于"}</a>
+        <a href={isEn ? "/en/#activity" : "#activity"} class="nav-link" data-section="activity">{isEn ? "Activity" : "活动"}</a>
+        <a href={isEn ? "/en/#news" : "#news"} class="nav-link" data-section="news">{isEn ? "Timeline" : "时间线"}</a>
+        <a href={isEn ? "/en/#projects" : "#projects"} class="nav-link" data-section="projects">{isEn ? "Projects" : "项目"}</a>
+        <a href={isEn ? "/en/#blog" : "#blog"} class="nav-link" data-section="blog">{isEn ? "Blog" : "博客"}</a>
+        <a href={isEn ? "/en/#knowledge" : "#knowledge"} class="nav-link" data-section="knowledge">{isEn ? "Knowledge" : "知识库"}</a>
+        <a href={isEn ? "/en/#contact" : "#contact"} class="nav-link" data-section="contact">{isEn ? "Contact" : "联系"}</a>
+      </nav>
 
-    <div class="social">
-      <a href="https://github.com/cutelizebin" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>
-      <a href="https://x.com/Zebin_Li98" target="_blank"><i class="fa-brands fa-x-twitter"></i> X</a>
-      <a href="https://www.linkedin.com/in/zebin-li/" target="_blank"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
+      <div class="social">
+        <a href="https://github.com/cutelizebin" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>
+        <a href="https://x.com/Zebin_Li98" target="_blank"><i class="fa-brands fa-x-twitter"></i> X</a>
+        <a href="https://www.linkedin.com/in/zebin-li/" target="_blank"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
+      </div>
     </div>
   </aside>
 
-  <main class="main">
+  <main class="main" id="main">
     <slot />
   </main>
 
   <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title={isEn ? "Back to top" : "返回顶部"}>↑</button>
 
   <script>
+    // Mobile menu toggle
+    var toggle = document.getElementById('menuToggle');
+    var body = document.getElementById('sidebarBody');
+    if (toggle && body) {
+      toggle.addEventListener('click', function() {
+        body.classList.toggle('open');
+        toggle.classList.toggle('open');
+      });
+      // Close menu on nav link click
+      body.querySelectorAll('.nav-link').forEach(function(link) {
+        link.addEventListener('click', function() {
+          body.classList.remove('open');
+          toggle.classList.remove('open');
+        });
+      });
+    }
+
+    // Active section highlight
+    var sections = document.querySelectorAll('.section');
+    var navLinks = document.querySelectorAll('.nav-link');
+    function updateActive() {
+      var current = '';
+      sections.forEach(function(s) {
+        var top = s.getBoundingClientRect().top;
+        if (top < window.innerHeight / 2) {
+          current = s.id;
+        }
+      });
+      navLinks.forEach(function(link) {
+        link.classList.toggle('active', link.dataset.section === current);
+      });
+    }
+    if (sections.length) {
+      window.addEventListener('scroll', updateActive);
+      updateActive();
+    }
+
+    // Back to top
     window.addEventListener('scroll', function() {
       var btn = document.getElementById('back-to-top');
       if (window.scrollY > 300) {
@@ -117,15 +162,20 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
     }
 
     :root {
-      --bg-color: #ffffff;
-      --sidebar-bg: #f8f9fa;
-      --text-color: #333333;
-      --text-light: #666666;
-      --accent-color: #2563eb;
-      --border-color: #e5e7eb;
-      --hover-color: #f3f4f6;
+      --bg: #f9fafb;
+      --sidebar-bg: #f2f3f7;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --accent: #2563eb;
+      --accent-light: #dbeafe;
+      --border: #e2e8f0;
+      --hover: #eef2ff;
+      --card-bg: #ffffff;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-hover: 0 4px 12px rgba(0,0,0,0.08);
       --sidebar-width: 240px;
-      --content-max-width: 1000px;
+      --content-max-width: 800px;
+      --radius: 12px;
     }
 
     html {
@@ -134,9 +184,9 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      color: var(--text-color);
-      line-height: 1.6;
-      background: var(--bg-color);
+      color: var(--text);
+      line-height: 1.7;
+      background: var(--bg);
     }
 
     .sidebar {
@@ -146,58 +196,98 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
       width: var(--sidebar-width);
       height: 100vh;
       background: var(--sidebar-bg);
-      border-right: 1px solid var(--border-color);
-      padding: 40px 24px;
+      border-right: 1px solid var(--border);
+      padding: 32px 20px;
       display: flex;
       flex-direction: column;
-      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .menu-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    .menu-toggle.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .menu-toggle.open span:nth-child(2) { opacity: 0; }
+    .menu-toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    .sidebar-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
     }
 
     .profile {
       text-align: center;
-      margin-bottom: 32px;
     }
 
     .avatar {
-      width: 100px;
-      height: 100px;
+      width: 96px;
+      height: 96px;
       border-radius: 50%;
       object-fit: cover;
-      margin-bottom: 16px;
-      background: #e5e7eb;
+      margin-bottom: 12px;
+      border: 3px solid white;
+      box-shadow: var(--shadow);
     }
 
     .name {
       font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 4px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
     }
 
     .title {
       font-size: 13px;
       color: var(--text-light);
+      margin-top: 2px;
     }
 
     .lang-switch {
-      margin-top: 8px;
+      margin-top: 10px;
+      margin-bottom: 24px;
     }
 
     .lang-switch a {
       font-size: 12px;
-      color: var(--accent-color);
+      color: var(--accent);
       text-decoration: none;
-      padding: 4px 8px;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: all 0.2s;
     }
 
     .lang-switch a:hover {
-      background: var(--hover-color);
+      background: var(--hover);
     }
 
     .lang-switch a.active {
-      background: var(--accent-color);
+      background: var(--accent);
       color: white;
+      border-color: var(--accent);
     }
 
     .lang-switch .divider {
@@ -208,102 +298,129 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
     .nav {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      margin-bottom: 32px;
+      gap: 2px;
     }
 
     .nav-link {
       display: block;
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
       text-decoration: none;
-      color: var(--text-color);
+      color: var(--text-light);
       font-size: 14px;
+      font-weight: 500;
       transition: all 0.2s;
     }
 
     .nav-link:hover {
-      background: var(--hover-color);
+      background: var(--hover);
+      color: var(--accent);
     }
 
     .nav-link.active {
-      background: var(--accent-color);
+      background: var(--accent);
       color: white;
     }
 
     .social {
       margin-top: auto;
       display: flex;
-      gap: 12px;
+      gap: 10px;
       justify-content: center;
       flex-wrap: wrap;
+      padding-top: 24px;
     }
 
     .social a {
       font-size: 12px;
-      color: var(--accent-color);
+      color: var(--text-light);
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: all 0.2s;
     }
 
     .social a:hover {
-      text-decoration: underline;
+      color: var(--accent);
+      background: var(--hover);
     }
 
     .social .fa-brands {
       font-size: 14px;
     }
 
-    .section .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 24px;
-      background: var(--accent-color);
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: 500;
-      transition: opacity 0.2s;
-    }
-
-    .section .btn:hover {
-      opacity: 0.9;
-      text-decoration: none;
-    }
-
     .main {
       margin-left: var(--sidebar-width);
-      padding: 48px 100px;
+      padding: 48px 48px;
       max-width: var(--content-max-width);
     }
 
     .section {
-      margin-bottom: 48px;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.3s;
+    }
+
+    .section:hover {
+      box-shadow: var(--shadow-hover);
+    }
+
+    .section:target {
+      box-shadow: 0 0 0 2px var(--accent), var(--shadow-hover);
     }
 
     .section h2 {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--border-color);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .section p {
       margin-bottom: 12px;
-      color: var(--text-color);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.75;
     }
 
     .section a {
-      color: var(--accent-color);
+      color: var(--accent);
       text-decoration: none;
     }
 
     .section a:hover {
       text-decoration: underline;
+    }
+
+    .section .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .section .btn:hover {
+      opacity: 0.9;
+      text-decoration: none;
+      box-shadow: var(--shadow);
     }
 
     .news-list {
@@ -312,48 +429,54 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
     }
 
     .news-list li {
-      padding: 12px 0;
-      padding-left: 20px;
-      border-left: 2px solid var(--border-color);
+      padding: 14px 0 14px 24px;
+      border-left: 2px solid var(--border);
       position: relative;
-      margin-left: 8px;
+      margin-left: 10px;
+    }
+
+    .news-list li:last-child {
+      border-left-color: transparent;
     }
 
     .news-list li::before {
       content: '';
       position: absolute;
-      left: -6px;
-      top: 18px;
-      width: 10px;
-      height: 10px;
+      left: -7px;
+      top: 20px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
-      background: var(--accent-color);
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      box-shadow: 0 0 0 2px white;
     }
 
     .news-list .date {
-      color: var(--text-light);
-      font-size: 13px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
       display: block;
       margin-bottom: 4px;
+      letter-spacing: 0.02em;
     }
 
     .news-list .sub-event {
       margin-top: 8px;
-      padding: 8px 0 8px 24px;
+      padding: 10px 0 10px 28px;
       position: relative;
-      background: #f8f9fa;
-      border-radius: 6px;
+      background: var(--bg);
+      border-radius: 8px;
       margin-left: -8px;
     }
 
     .news-list .sub-event::before {
       content: '';
       position: absolute;
-      left: 8px;
+      left: 10px;
       top: -8px;
       width: 2px;
       height: 8px;
-      background: var(--border-color);
+      background: var(--border);
     }
 
     .news-list .sub-event::after {
@@ -361,50 +484,24 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
       position: absolute;
       left: 0;
       top: -4px;
-      width: 16px;
+      width: 18px;
       height: 2px;
-      background: var(--border-color);
+      background: var(--border);
     }
 
     .news-list .sub-event .date {
       font-size: 11px;
-      color: var(--accent-color);
+      color: var(--accent);
       font-weight: 600;
-      text-transform: uppercase;
     }
 
     .news-list .sub-event p {
       font-size: 13px;
       margin-top: 4px;
-      color: var(--text-color);
     }
 
     .news-list .sub-event a {
-      color: var(--accent-color);
-      text-decoration: none;
       font-size: 12px;
-    }
-
-    .news-list .sub-event a:hover {
-      text-decoration: underline;
-    }
-
-    .pub-list {
-      list-style: none;
-    }
-
-    .pub-item {
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .pub-item:last-child {
-      border-bottom: none;
-    }
-
-    .pub-item .venue {
-      font-size: 13px;
-      color: var(--text-light);
     }
 
     .project-list {
@@ -412,13 +509,27 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
     }
 
     .project-list li {
-      padding: 12px 0;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+      margin: 0 -12px;
+      padding: 12px 12px;
+      border-radius: 8px;
+    }
+
+    .project-list li:last-child {
+      border-bottom: none;
+    }
+
+    .project-list li:hover {
+      background: var(--bg);
     }
 
     .project-list p {
       font-size: 14px;
       color: var(--text-light);
       margin-top: 4px;
+      line-height: 1.6;
     }
 
     #back-to-top {
@@ -427,7 +538,7 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
       right: 24px;
       width: 40px;
       height: 40px;
-      background: var(--accent-color);
+      background: var(--accent);
       color: white;
       border: none;
       border-radius: 50%;
@@ -435,35 +546,118 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
       font-size: 18px;
       display: none;
       z-index: 1000;
+      box-shadow: var(--shadow);
+      transition: all 0.2s;
     }
 
     #back-to-top:hover {
-      opacity: 0.8;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
     }
 
     @media (max-width: 768px) {
       .sidebar {
-        position: relative;
+        position: fixed;
         width: 100%;
         height: auto;
         border-right: none;
-        border-bottom: 1px solid var(--border-color);
-        padding: 24px;
+        border-bottom: 1px solid var(--border);
+        padding: 12px 16px;
+        background: rgba(242, 243, 247, 0.98);
+        backdrop-filter: blur(8px);
       }
 
-      .main {
-        margin-left: 0;
-        padding: 24px;
+      .sidebar-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .avatar {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 0;
+        border-width: 2px;
+      }
+
+      .name {
+        font-size: 16px;
+        margin-bottom: 0;
+      }
+
+      .title {
+        display: none;
+      }
+
+      .lang-switch {
+        margin: 0;
+        margin-left: auto;
+        margin-bottom: 0;
+      }
+
+      .lang-switch a {
+        font-size: 11px;
+        padding: 2px 8px;
+      }
+
+      .lang-switch .divider {
+        display: none;
+      }
+
+      .menu-toggle {
+        display: flex;
+      }
+
+      .sidebar-body {
+        display: none;
+        position: fixed;
+        top: 65px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 65px);
+        background: rgba(242, 243, 247, 0.98);
+        backdrop-filter: blur(8px);
+        padding: 16px 20px;
+        overflow-y: auto;
+      }
+
+      .sidebar-body.open {
+        display: flex;
       }
 
       .nav {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
+        flex-direction: column;
+      }
+
+      .nav-link {
+        padding: 12px 16px;
+        font-size: 16px;
       }
 
       .social {
         margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 80px 16px 24px;
+      }
+
+      .section {
+        padding: 20px;
+        margin-bottom: 16px;
+      }
+
+      .section h2 {
+        font-size: 18px;
       }
     }
   </style>
