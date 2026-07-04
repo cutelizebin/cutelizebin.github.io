@@ -123,17 +123,43 @@ const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大�
       });
     }
 
-    // Active section highlight based on URL hash
+    // Active section: click + scroll tracking
     var navLinks = document.querySelectorAll('.nav-link');
-    function updateActive() {
-      var hash = window.location.hash || (navLinks.length ? navLinks[0].getAttribute('href').replace('#', '#') : '');
+    var sections = document.querySelectorAll('.section');
+
+    function setActive(hash) {
       navLinks.forEach(function(link) {
-        var target = '#' + link.dataset.section;
-        link.classList.toggle('active', target === hash);
+        link.classList.toggle('active', ('#' + link.dataset.section) === hash);
       });
     }
-    window.addEventListener('hashchange', updateActive);
-    updateActive();
+
+    // On hash change (link click)
+    window.addEventListener('hashchange', function() {
+      setActive(window.location.hash);
+    });
+
+    // On scroll, update hash silently
+    var ticking = false;
+    window.addEventListener('scroll', function() {
+      if (!ticking) {
+        requestAnimationFrame(function() {
+          var current = '';
+          sections.forEach(function(s) {
+            if (s.getBoundingClientRect().top < window.innerHeight * 0.35) {
+              current = '#' + s.id;
+            }
+          });
+          if (current && current !== window.location.hash) {
+            history.replaceState(null, '', current);
+            setActive(current);
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+
+    setActive(window.location.hash || '#' + (sections.length ? sections[0].id : 'about'));
 
     // Back to top
     window.addEventListener('scroll', function() {
