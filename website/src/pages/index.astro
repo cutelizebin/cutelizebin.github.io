@@ -1,0 +1,118 @@
+---
+import HomeLayout from '../layouts/HomeLayout.astro';
+---
+
+<HomeLayout
+  title="李泽斌 - 个人主页"
+  description="李泽斌的个人主页 - MiniMax LLM推理Infra工程师，上海交通大学IPADS实验室硕士。专注于KVCache存储和调度优化、安全容器虚拟化研究。"
+  lang="zh"
+  currentPath={Astro.url.pathname}
+>
+  <section id="about" class="section">
+    <h2>关于我</h2>
+    <p>
+      我目前在 <strong>MiniMax</strong> 担任 LLM 推理 Infra 工程师，主要从事 KVCache 存储和调度优化工作。
+    </p>
+    <p>
+      之前在字节跳动 DPU 部门从事 Kata Container 安全容器虚拟化研发。
+    </p>
+    <p>
+      硕士阶段于上海交通大学 <strong>IPADS 实验室</strong> 攻读，导师为陈海波教授和夏虞斌教授。
+      <a href="https://ipads.se.sjtu.edu.cn/zh/pub/members/zebin_li/" target="_blank">[实验室主页]</a>
+    </p>
+  </section>
+
+  <section id="activity" class="section">
+    <h2>活动</h2>
+    <ul class="news-list">
+      <li>
+        <span class="date">2026.03</span>
+        Red Hat vLLM Meetup 演讲
+        <p><a href="https://www.linkedin.com/posts/zebin-li_great-meetup-so-happy-to-have-given-a-talk-ugcPost-7457341429267222528-vsGa/" target="_blank">查看详情</a></p>
+      </li>
+    </ul>
+  </section>
+
+  <section id="news" class="section">
+    <h2>时间线</h2>
+    <ul class="news-list">
+      <li>
+        <span class="date">2025.10 - 至今</span>
+        MiniMax，LLM 推理 Infra 工程师
+        <p>KVCache 存储和调度优化</p>
+      </li>
+      <li>
+        <span class="date">2023.03 - 2025.10</span>
+        字节跳动，安全容器虚拟化研发工程师
+        <p>火山引擎 DPU Kata Container 安全容器虚拟化负责人</p>
+      </li>
+      <li>
+        <span class="date">2020.09 - 2023.03</span>
+        上海交通大学 硕士
+        <p>软件学院 IPADS 实验室，导师：陈海波、夏虞斌</p>
+      </li>
+      <li>
+        <span class="date">2016.09 - 2020.06</span>
+        南京大学 本科
+        <p>软件学院</p>
+      </li>
+    </ul>
+  </section>
+
+  <section id="projects" class="section">
+    <h2>项目</h2>
+    <ul class="project-list">
+      <li>
+        <strong>KVCache 存储</strong>
+        <p>目标：统一管理 DRAM/SSD 上的 KVCache，作为独立的组件 daemon，与推理框架（vLLM/sglang/内部框架）解耦，同时上报 KVCache metadata 给调度器做 KVCache-aware 调度。<a href="/kvcache/">[详情]</a></p>
+      </li>
+      <li>
+        <strong>KVCache 模拟器</strong>
+        <p>用于预估特定模型需要的 KVCache 容量，评估 KVCache 感知调度算法的有效性，节约测试占用卡时和人力。</p>
+      </li>
+      <li>
+        <strong>DPU 上的 Kata-Runtime 卸载和性能优化</strong>
+        <p>完成 QEMU Kata Container 到 DPU 上的虚拟化卸载，完成模拟设备到 DPU 上的卸载工作，针对高密部署、高并发启动做优化，将部署密度提升 1x。<a href="/dpu-kata/">[详情]</a></p>
+      </li>
+      <li>
+        <strong>Titanium: 轻量级 ARM TrustZone VMM</strong>
+        <p>利用 ARMv8.4 SEL2 新特性，在 TrustZone 中实现轻量级 VMM，与华为海思合作，包含 C 和 Rust 版本。</p>
+      </li>
+      <li>
+        <strong>公有云 IOMMU 性能优化</strong>
+        <p>研究优化 SRIOV + VFIO 方案中 IOMMU PageTable NUMA 分配不均的问题。</p>
+      </li>
+    </ul>
+  </section>
+
+  <section id="blog" class="section">
+    <h2>博客</h2>
+    <ul class="news-list">
+      <li>
+        <span class="date">2026.05</span>
+        DeepSeek-V4-Pro 每个 token 的 KVCache 大小是多少
+        <p>10.2 KB/token，24x 压缩率的核心推导</p>
+        <p><a href="/blog-dv4-pro-kvcache/" target="_blank">阅读更多</a></p>
+      </li>
+      <li>
+        <span class="date">2026.03</span>
+        KVCache Practices at MiniMax for Agentic Workloads
+        <p>从Traffic Characteristics到Architectural Insights的实践分享</p>
+        <p><a href="/kvcache-practices-minimax.pdf" target="_blank">查看PDF</a></p>
+      </li>
+    </ul>
+  </section>
+
+  <section id="knowledge" class="section">
+    <h2>知识库</h2>
+    <p>我的个人知识库，基于 <strong>IMA</strong>（腾讯AI知识助手）构建。包含技术笔记、研究总结和历年学习资料。</p>
+    <p>涵盖方向：KVCache 优化、LLM 推理系统、容器虚拟化、操作系统内核等。</p>
+    <p><a href="https://ima.qq.com/wiki/?shareId=899dcecbd10c666a927221b325413d03cf917fc0839232da6fa71b0e1c6497fd" target="_blank" class="btn"><i class="fa-brands fa-tencent"></i> 探索知识库</a></p>
+  </section>
+
+  <section id="contact" class="section">
+    <h2>联系</h2>
+    <p>邮箱：<a href="mailto:hellolizebin@foxmail.com">hellolizebin@foxmail.com</a></p>
+    <p>所在地：上海，中国</p>
+  </section>
+</HomeLayout>

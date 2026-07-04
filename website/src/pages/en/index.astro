@@ -1,0 +1,118 @@
+---
+import HomeLayout from '../../layouts/HomeLayout.astro';
+---
+
+<HomeLayout
+  title="Zebin Li - Personal Homepage"
+  description="Zebin Li's personal homepage - MiniMax LLM Inference Infra Engineer, SJTU IPADS Lab Master. Focused on KVCache storage optimization and secure container virtualization."
+  lang="en"
+  currentPath={Astro.url.pathname}
+>
+  <section id="about" class="section">
+    <h2>About Me</h2>
+    <p>
+      I'm currently a <strong>LLM Inference Infra Engineer</strong> at <strong>MiniMax</strong>, working on KVCache storage and scheduling optimization.
+    </p>
+    <p>
+      Previously, I worked on Kata Container secure container virtualization at ByteDance's DPU department.
+    </p>
+    <p>
+      I earned my Master's degree at Shanghai Jiao Tong University, <strong>IPADS Lab</strong>, advised by Prof. Haibo Chen and Prof. Yubin Xia.
+      <a href="https://ipads.se.sjtu.edu.cn/zh/pub/members/zebin_li/" target="_blank">[Lab Page]</a>
+    </p>
+  </section>
+
+  <section id="activity" class="section">
+    <h2>Activity</h2>
+    <ul class="news-list">
+      <li>
+        <span class="date">2026.03</span>
+        Talk at Red Hat vLLM Meetup
+        <p><a href="https://www.linkedin.com/posts/zebin-li_great-meetup-so-happy-to-have-given-a-talk-ugcPost-7457341429267222528-vsGa/" target="_blank">View details</a></p>
+      </li>
+    </ul>
+  </section>
+
+  <section id="news" class="section">
+    <h2>Timeline</h2>
+    <ul class="news-list">
+      <li>
+        <span class="date">2025.10 - Present</span>
+        MiniMax, LLM Inference Infra Engineer
+        <p>KVCache storage and scheduling optimization</p>
+      </li>
+      <li>
+        <span class="date">2023.03 - 2025.10</span>
+        ByteDance, Secure Container Virtualization Engineer
+        <p>Volcano Engine DPU Kata Container lead</p>
+      </li>
+      <li>
+        <span class="date">2020.09 - 2023.03</span>
+        Shanghai Jiao Tong University, Master
+        <p>School of Software, IPADS Lab, advised by Prof. Haibo Chen & Yubin Xia</p>
+      </li>
+      <li>
+        <span class="date">2016.09 - 2020.06</span>
+        Nanjing University, Bachelor
+        <p>School of Software</p>
+      </li>
+    </ul>
+  </section>
+
+  <section id="projects" class="section">
+    <h2>Projects</h2>
+    <ul class="project-list">
+      <li>
+        <strong>KVCache Storage</strong>
+        <p>Unified DRAM/SSD KVCache management as an independent daemon, decoupled from inference frameworks (vLLM/sglang/internal), reporting KVCache metadata for scheduler-aware scheduling.<a href="/kvcache-en/">[Details]</a></p>
+      </li>
+      <li>
+        <strong>KVCache Simulator</strong>
+        <p>Estimates KVCache capacity requirements and evaluates cache-aware scheduling algorithms, saving GPU time and engineering resources.</p>
+      </li>
+      <li>
+        <strong>Kata-Runtime Offloading on DPU</strong>
+        <p>Offloaded QEMU Kata Container and emulated devices to DPU, optimized for high-density deployment and concurrent startup, achieving 1x density improvement.<a href="/dpu-kata-en/">[Details]</a></p>
+      </li>
+      <li>
+        <strong>Titanium: Lightweight ARM TrustZone VMM</strong>
+        <p>Leveraged ARMv8.4 SEL2 to build a lightweight VMM in TrustZone, in collaboration with HiSilicon. Available in C and Rust.</p>
+      </li>
+      <li>
+        <strong>Public Cloud IOMMU Performance Optimization</strong>
+        <p>Optimized NUMA-unbalanced IOMMU PageTable allocation in SRIOV + VFIO setups.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section id="blog" class="section">
+    <h2>Blog</h2>
+    <ul class="news-list">
+      <li>
+        <span class="date">2026.05</span>
+        DeepSeek-V4-Pro: KVCache Size Per Token
+        <p>10.2 KB/token, 24x compression ratio derivation</p>
+        <p><a href="/blog-dv4-pro-kvcache-en/" target="_blank">Read more</a></p>
+      </li>
+      <li>
+        <span class="date">2026.03</span>
+        KVCache Practices at MiniMax for Agentic Workloads
+        <p>From Traffic Characteristics to Architectural Insights</p>
+        <p><a href="/kvcache-practices-minimax.pdf" target="_blank">View PDF</a></p>
+      </li>
+    </ul>
+  </section>
+
+  <section id="knowledge" class="section">
+    <h2>Knowledge Base</h2>
+    <p>My personal knowledge base, built on <strong>IMA</strong> (Tencent AI Knowledge Assistant). Contains technical notes, research summaries, and study materials.</p>
+    <p>Topics: KVCache optimization, LLM inference systems, container virtualization, OS kernel, etc.</p>
+    <p><a href="https://ima.qq.com/wiki/?shareId=899dcecbd10c666a927221b325413d03cf917fc0839232da6fa71b0e1c6497fd" target="_blank" class="btn"><i class="fa-brands fa-tencent"></i> Explore Knowledge Base</a></p>
+  </section>
+
+  <section id="contact" class="section">
+    <h2>Contact</h2>
+    <p>Email: <a href="mailto:hellolizebin@foxmail.com">hellolizebin@foxmail.com</a></p>
+    <p>Location: Shanghai, China</p>
+  </section>
+</HomeLayout>

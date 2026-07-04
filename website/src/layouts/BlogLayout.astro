@@ -1,0 +1,73 @@
+---
+export interface Props {
+  title: string;
+  description?: string;
+  lang: 'zh' | 'en';
+  canonical?: string;
+}
+const { title, description, lang, canonical } = Astro.props;
+const homePath = lang === 'zh' ? '/' : '/en/';
+const homeLabel = lang === 'zh' ? '← 返回主页' : '← Back to Home';
+---
+
+<!DOCTYPE html>
+<html lang={lang}>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  {description && <meta name="description" content={description}>}
+  {canonical && <link rel="canonical" href={canonical}>}
+  <link rel="icon" href="/favicon.ico">
+  <style>
+    body { padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: #333; }
+    h1 { margin-bottom: 24px; }
+    h2 { margin-top: 32px; margin-bottom: 16px; }
+    h3 { margin-top: 24px; margin-bottom: 12px; }
+    .back { margin-bottom: 32px; }
+    .back a { color: #2563eb; text-decoration: none; }
+    .back a:hover { text-decoration: underline; }
+    .highlight {
+      background: #dbeafe;
+      border: 2px solid #2563eb;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      text-align: center;
+    }
+    .highlight .number {
+      font-size: 48px;
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .highlight .label {
+      font-size: 18px;
+      color: #666;
+      margin-top: 8px;
+    }
+    .highlight .sub {
+      font-size: 16px;
+      color: #666;
+      margin-top: 16px;
+    }
+    ul, ol { padding-left: 24px; }
+    li { margin-bottom: 8px; }
+    code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
+    pre { background: #f3f4f6; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 16px 0; }
+    table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+    th, td { border: 1px solid #e5e7eb; padding: 8px 12px; text-align: left; }
+    th { background: #f3f4f6; }
+  </style>
+</head>
+<body>
+  <div class="back">
+    <a href={homePath}>{homeLabel}</a>
+  </div>
+
+  <slot />
+
+  <div class="back">
+    <a href={homePath}>{homeLabel}</a>
+  </div>
+</body>
+</html>

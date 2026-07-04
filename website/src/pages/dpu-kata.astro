@@ -1,0 +1,35 @@
+---
+import BlogLayout from '../layouts/BlogLayout.astro';
+---
+
+<BlogLayout title="DPU 上的 Kata-Runtime 卸载和性能优化 - 项目详情" lang="zh">
+  <h1>DPU 上的 Kata-Runtime 卸载和性能优化</h1>
+
+  <h2>项目背景</h2>
+  <p>
+    火山引擎 DPU 部门致力于将虚拟化卸载到 DPU（Data Processing Unit）上，以提升部署密度和降低成本。
+    Kata Container 是字节跳动开源的安全容器运行时，本项目完成了 QEMU Kata Container 到 DPU 上的虚拟化卸载。
+  </p>
+
+  <h2>主要工作</h2>
+  <ul>
+    <li>完成 QEMU Kata Container 到 DPU 上的虚拟化卸载</li>
+    <li>完成模拟设备到 DPU 上的卸载工作</li>
+    <li>针对高密部署场景优化</li>
+    <li>针对高并发启动场景优化</li>
+  </ul>
+
+  <h2>成果</h2>
+  <ul>
+    <li>将部署密度提升 <strong>1 倍</strong></li>
+    <li>产出 4 项专利，全部获得授权</li>
+  </ul>
+
+  <h2>技术栈</h2>
+  <ul>
+    <li>Kata Container</li>
+    <li>QEMU</li>
+    <li>DPU 虚拟化</li>
+    <li>VFIO</li>
+  </ul>
+</BlogLayout>

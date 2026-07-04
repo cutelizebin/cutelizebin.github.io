@@ -1,0 +1,471 @@
+---
+export interface Props {
+  title: string;
+  description: string;
+  lang: 'zh' | 'en';
+  currentPath: string;
+}
+const { title, description, lang, currentPath } = Astro.props;
+
+const enHref = '/en/';
+const zhHref = '/';
+const isEn = lang === 'en';
+
+const schemaName = isEn ? 'Zebin Li' : '李泽斌';
+const schemaJob = isEn ? 'LLM Inference Infra Engineer' : 'LLM推理Infra工程师';
+const schemaAlumni = isEn ? 'Shanghai Jiao Tong University' : '上海交通大学';
+---
+
+<!DOCTYPE html>
+<html lang={lang}>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{title}</title>
+  <meta name="description" content={description}>
+  <meta name="keywords" content={isEn ? "Zebin Li,KVCache,virtualization,MiniMax,IPADS,Shanghai Jiao Tong University,LLM inference" : "李泽斌,KVCache,虚拟化,MiniMax,IPADS,上海交通大学,LLM推理,大模型 inference"}>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="icon" href="/avatar.jpg">
+  <link rel="sitemap" href="/sitemap-index.xml">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content={title}>
+  <meta property="og:description" content={description}>
+  <meta property="og:url" content={`https://cutelizebin.github.io${currentPath}`}>
+  <meta property="og:type" content="profile">
+  <meta property="og:image" content="https://cutelizebin.github.io/avatar.jpg">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content={title}>
+  <meta name="twitter:description" content={isEn ? "LLM Inference Infra Engineer" : "LLM推理Infra工程师"}>
+  <meta name="twitter:image" content="https://cutelizebin.github.io/avatar.jpg">
+
+  <!-- Schema.org Person -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": schemaName,
+    "url": "https://cutelizebin.github.io",
+    "sameAs": [
+      "https://github.com/cutelizebin",
+      "https://x.com/Zebin_Li98",
+      "https://www.linkedin.com/in/zebin-li/"
+    ],
+    "jobTitle": schemaJob,
+    "worksFor": {
+      "@type": "Organization",
+      "name": "MiniMax"
+    },
+    "alumniOf": {
+      "@type": "Organization",
+      "name": schemaAlumni
+    }
+  })}></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="profile">
+      <img src="/avatar.jpg" alt={isEn ? "Avatar" : "头像"} class="avatar" width="100" height="100">
+      <h1 class="name">{isEn ? "Zebin Li" : "李泽斌"}</h1>
+      <p class="title">ENFJ</p>
+      <p class="lang-switch">
+        <a href={enHref} class={isEn ? "active" : ""}>English</a>
+        <span class="divider">|</span>
+        <a href={zhHref} class={isEn ? "" : "active"}>中文</a>
+      </p>
+    </div>
+
+    <nav class="nav">
+      <a href={isEn ? "/en/#about" : "#about"} class="nav-link">{isEn ? "About" : "关于"}</a>
+      <a href={isEn ? "/en/#activity" : "#activity"} class="nav-link">{isEn ? "Activity" : "活动"}</a>
+      <a href={isEn ? "/en/#news" : "#news"} class="nav-link">{isEn ? "Timeline" : "时间线"}</a>
+      <a href={isEn ? "/en/#projects" : "#projects"} class="nav-link">{isEn ? "Projects" : "项目"}</a>
+      <a href={isEn ? "/en/#blog" : "#blog"} class="nav-link">{isEn ? "Blog" : "博客"}</a>
+      <a href={isEn ? "/en/#knowledge" : "#knowledge"} class="nav-link">{isEn ? "Knowledge" : "知识库"}</a>
+      <a href={isEn ? "/en/#contact" : "#contact"} class="nav-link">{isEn ? "Contact" : "联系"}</a>
+    </nav>
+
+    <div class="social">
+      <a href="https://github.com/cutelizebin" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>
+      <a href="https://x.com/Zebin_Li98" target="_blank"><i class="fa-brands fa-x-twitter"></i> X</a>
+      <a href="https://www.linkedin.com/in/zebin-li/" target="_blank"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <slot />
+  </main>
+
+  <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title={isEn ? "Back to top" : "返回顶部"}>↑</button>
+
+  <script>
+    window.addEventListener('scroll', function() {
+      var btn = document.getElementById('back-to-top');
+      if (window.scrollY > 300) {
+        btn.style.display = 'block';
+      } else {
+        btn.style.display = 'none';
+      }
+    });
+  </script>
+
+  <style is:global>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-color: #ffffff;
+      --sidebar-bg: #f8f9fa;
+      --text-color: #333333;
+      --text-light: #666666;
+      --accent-color: #2563eb;
+      --border-color: #e5e7eb;
+      --hover-color: #f3f4f6;
+      --sidebar-width: 240px;
+      --content-max-width: 1000px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--text-color);
+      line-height: 1.6;
+      background: var(--bg-color);
+    }
+
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border-color);
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .profile {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 16px;
+      background: #e5e7eb;
+    }
+
+    .name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .title {
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    .lang-switch {
+      margin-top: 8px;
+    }
+
+    .lang-switch a {
+      font-size: 12px;
+      color: var(--accent-color);
+      text-decoration: none;
+      padding: 4px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+    }
+
+    .lang-switch a:hover {
+      background: var(--hover-color);
+    }
+
+    .lang-switch a.active {
+      background: var(--accent-color);
+      color: white;
+    }
+
+    .lang-switch .divider {
+      margin: 0 4px;
+      color: var(--text-light);
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 32px;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--text-color);
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+      background: var(--hover-color);
+    }
+
+    .nav-link.active {
+      background: var(--accent-color);
+      color: white;
+    }
+
+    .social {
+      margin-top: auto;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .social a {
+      font-size: 12px;
+      color: var(--accent-color);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .social a:hover {
+      text-decoration: underline;
+    }
+
+    .social .fa-brands {
+      font-size: 14px;
+    }
+
+    .section .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--accent-color);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+
+    .section .btn:hover {
+      opacity: 0.9;
+      text-decoration: none;
+    }
+
+    .main {
+      margin-left: var(--sidebar-width);
+      padding: 48px 100px;
+      max-width: var(--content-max-width);
+    }
+
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section h2 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .section p {
+      margin-bottom: 12px;
+      color: var(--text-color);
+    }
+
+    .section a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    .section a:hover {
+      text-decoration: underline;
+    }
+
+    .news-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .news-list li {
+      padding: 12px 0;
+      padding-left: 20px;
+      border-left: 2px solid var(--border-color);
+      position: relative;
+      margin-left: 8px;
+    }
+
+    .news-list li::before {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 18px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-color);
+    }
+
+    .news-list .date {
+      color: var(--text-light);
+      font-size: 13px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .news-list .sub-event {
+      margin-top: 8px;
+      padding: 8px 0 8px 24px;
+      position: relative;
+      background: #f8f9fa;
+      border-radius: 6px;
+      margin-left: -8px;
+    }
+
+    .news-list .sub-event::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: -8px;
+      width: 2px;
+      height: 8px;
+      background: var(--border-color);
+    }
+
+    .news-list .sub-event::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: -4px;
+      width: 16px;
+      height: 2px;
+      background: var(--border-color);
+    }
+
+    .news-list .sub-event .date {
+      font-size: 11px;
+      color: var(--accent-color);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .news-list .sub-event p {
+      font-size: 13px;
+      margin-top: 4px;
+      color: var(--text-color);
+    }
+
+    .news-list .sub-event a {
+      color: var(--accent-color);
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    .news-list .sub-event a:hover {
+      text-decoration: underline;
+    }
+
+    .pub-list {
+      list-style: none;
+    }
+
+    .pub-item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .pub-item:last-child {
+      border-bottom: none;
+    }
+
+    .pub-item .venue {
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    .project-list {
+      list-style: none;
+    }
+
+    .project-list li {
+      padding: 12px 0;
+    }
+
+    .project-list p {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    #back-to-top {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 40px;
+      height: 40px;
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      display: none;
+      z-index: 1000;
+    }
+
+    #back-to-top:hover {
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 24px;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 24px;
+      }
+
+      .nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .social {
+        margin-top: 16px;
+      }
+    }
+  </style>
+</body>
+</html>

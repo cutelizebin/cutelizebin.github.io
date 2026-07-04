@@ -1,0 +1,82 @@
+---
+import BlogLayout from '../layouts/BlogLayout.astro';
+---
+
+<BlogLayout
+  title="DeepSeek-V4-Pro 每个 token 的 KVCache 大小是多少"
+  description="DeepSeek-V4-Pro KVCache 大小计算过程，核心公式和推导"
+  lang="zh"
+  canonical="https://cutelizebin.github.io/blog-dv4-pro-kvcache/"
+>
+  <h1>DeepSeek-V4-Pro 每个 token 的 KVCache 大小是多少</h1>
+
+  <div class="highlight">
+    <div class="number">10.2 KB/token</div>
+    <div class="label">每个 token 的 KVCache 占用</div>
+    <div class="sub">1M 上下文 ≈ 10.9 MB · 相比 BF16 GQA8 压缩 24x</div>
+  </div>
+
+  <h2>结论</h2>
+  <ul>
+    <li><strong>每个 token KVCache 大小：10.2 KB</strong></li>
+    <li>1M 上下文总 KVCache：≈ 10.9 MB</li>
+    <li>相比 BF16 GQA8 基线（单层 4,096 字节/token）：<strong>24x 压缩率</strong></li>
+    <li>考虑 FP4 索引器键后可达 <strong>31x</strong>，接近论文 2% 的声明</li>
+  </ul>
+
+  <h2>关键参数</h2>
+  <table>
+    <tr><th>参数</th><th>值</th></tr>
+    <tr><td>head_dim</td><td>512</td></tr>
+    <tr><td>qk_rope_head_dim</td><td>64</td></tr>
+    <tr><td>num_key_value_heads</td><td>1</td></tr>
+    <tr><td>num_hidden_layers</td><td>61</td></tr>
+    <tr><td>sliding_window</td><td>128</td></tr>
+  </table>
+
+  <h3>压缩策略</h3>
+  <p>前 2 层 = 128（HCA），之后交替：偶数索引 = 4（CSA），奇数索引 = 128（HCA）</p>
+  <p>层数统计：HCA = 31 层，CSA = 30 层</p>
+
+  <h2>单 KV 对大小（混合精度）</h2>
+  <ul>
+    <li>RoPE 部分：64 维 × 2 字节（BF16）= 128 字节</li>
+    <li>非 RoPE 部分：(512 - 64) = 448 维 × 1 字节（FP8）= 448 字节</li>
+    <li>单个 Key 或 Value = 128 + 448 = 576 字节</li>
+    <li>一对 KV（MQA，1 组） = 576 × 2 = <strong>1,152 字节</strong></li>
+  </ul>
+
+  <h2>各组件计算</h2>
+
+  <h3>1. SWA（滑动窗口，固定缓存摊销）</h3>
+  <pre>SWA 固定缓存 = 61 层 × 128 对 × 1,152 字节 = 8,994,816 字节
+SWA 每 token (1M 上下文) = 8,994,816 / 1,048,576 = 9.0 字节</pre>
+
+  <h3>2. HCA（31 层）</h3>
+  <pre>HCA 每 token 每层 = 1,152 / 128 = 9 字节
+HCA 总计 = 31 × 9 = 279 字节/token</pre>
+
+  <h3>3. CSA（30 层）</h3>
+  <pre>CSA 主 KV 每 token 每层 = 1,152 / 4 = 288 字节
+索引器键大小 = 64 × 2 + (128 - 64) × 1 = 192 字节
+CSA 索引器键每 token 每层 = 192 / 4 = 48 字节
+每 CSA 层合计 = 288 + 48 = 336 字节/token
+CSA 总计 = 30 × 336 = 10,080 字节/token</pre>
+
+  <h2>汇总</h2>
+  <table>
+    <tr><th>组件</th><th>每 token 大小</th><th>占比</th></tr>
+    <tr><td>SWA @ 1M</td><td>9.0 字节</td><td>0.09%</td></tr>
+    <tr><td>HCA</td><td>279 字节</td><td>2.69%</td></tr>
+    <tr><td>CSA 主 KV</td><td>8,640 字节</td><td>83.33%</td></tr>
+    <tr><td>CSA 索引器键</td><td>1,440 字节</td><td>13.89%</td></tr>
+    <tr><td><strong>总计</strong></td><td><strong>10,368 字节 ≈ 10.2 KB/token</strong></td><td>100%</td></tr>
+  </table>
+
+  <h2>核心公式</h2>
+  <pre>单个 KV 对大小 = 2 × (rope_dim × 2 + (head_dim - rope_dim) × 1)
+SWA 每 token = (n_layers × sliding_window × kv_pair_size) / seq_len
+HCA 每 token = hca_layers × (kv_pair_size / 128)
+CSA 每 token = csa_layers × (kv_pair_size / 4 + indexer_key_size / 4)
+总计 = SWA + HCA + CSA</pre>
+</BlogLayout>

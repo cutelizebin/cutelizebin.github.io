@@ -1,0 +1,82 @@
+---
+import BlogLayout from '../layouts/BlogLayout.astro';
+---
+
+<BlogLayout
+  title="DeepSeek-V4-Pro: KVCache Size Per Token"
+  description="DeepSeek-V4-Pro KVCache size calculation, core formulas and derivation"
+  lang="en"
+  canonical="https://cutelizebin.github.io/blog-dv4-pro-kvcache-en/"
+>
+  <h1>DeepSeek-V4-Pro: KVCache Size Per Token</h1>
+
+  <div class="highlight">
+    <div class="number">10.2 KB/token</div>
+    <div class="label">KVCache Size Per Token</div>
+    <div class="sub">1M context ≈ 10.9 MB · 24x compression vs BF16 GQA8</div>
+  </div>
+
+  <h2>Conclusion</h2>
+  <ul>
+    <li><strong>KVCache per token: 10.2 KB</strong></li>
+    <li>1M context total: ≈ 10.9 MB</li>
+    <li>vs BF16 GQA8 baseline (single layer 4,096 bytes/token): <strong>24x compression</strong></li>
+    <li>With FP4 indexer: up to <strong>31x</strong>, close to paper's 2% claim</li>
+  </ul>
+
+  <h2>Key Parameters</h2>
+  <table>
+    <tr><th>Parameter</th><th>Value</th></tr>
+    <tr><td>head_dim</td><td>512</td></tr>
+    <tr><td>qk_rope_head_dim</td><td>64</td></tr>
+    <tr><td>num_key_value_heads</td><td>1</td></tr>
+    <tr><td>num_hidden_layers</td><td>61</td></tr>
+    <tr><td>sliding_window</td><td>128</td></tr>
+  </table>
+
+  <h3>Compression Strategy</h3>
+  <p>First 2 layers = 128 (HCA), then alternating: even index = 4 (CSA), odd index = 128 (HCA)</p>
+  <p>Layer count: HCA = 31 layers, CSA = 30 layers</p>
+
+  <h2>Single KV Pair Size (Mixed Precision)</h2>
+  <ul>
+    <li>RoPE part: 64 dims × 2 bytes (BF16) = 128 bytes</li>
+    <li>Non-RoPE part: (512 - 64) = 448 dims × 1 byte (FP8) = 448 bytes</li>
+    <li>Single Key or Value = 128 + 448 = 576 bytes</li>
+    <li>One KV pair (MQA, 1 group) = 576 × 2 = <strong>1,152 bytes</strong></li>
+  </ul>
+
+  <h2>Component Calculations</h2>
+
+  <h3>1. SWA (Sliding Window, Fixed Cache Amortization)</h3>
+  <pre>SWA fixed cache = 61 layers × 128 pairs × 1,152 bytes = 8,994,816 bytes
+SWA per token (1M context) = 8,994,816 / 1,048,576 = 9.0 bytes</pre>
+
+  <h3>2. HCA (31 layers)</h3>
+  <pre>HCA per token per layer = 1,152 / 128 = 9 bytes
+HCA total = 31 × 9 = 279 bytes/token</pre>
+
+  <h3>3. CSA (30 layers)</h3>
+  <pre>CSA main KV per token per layer = 1,152 / 4 = 288 bytes
+Indexer key size = 64 × 2 + (128 - 64) × 1 = 192 bytes
+CSA indexer key per token per layer = 192 / 4 = 48 bytes
+Per CSA layer total = 288 + 48 = 336 bytes/token
+CSA total = 30 × 336 = 10,080 bytes/token</pre>
+
+  <h2>Summary</h2>
+  <table>
+    <tr><th>Component</th><th>Per Token</th><th>Share</th></tr>
+    <tr><td>SWA @ 1M</td><td>9.0 bytes</td><td>0.09%</td></tr>
+    <tr><td>HCA</td><td>279 bytes</td><td>2.69%</td></tr>
+    <tr><td>CSA main KV</td><td>8,640 bytes</td><td>83.33%</td></tr>
+    <tr><td>CSA indexer key</td><td>1,440 bytes</td><td>13.89%</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>10,368 bytes ≈ 10.2 KB/token</strong></td><td>100%</td></tr>
+  </table>
+
+  <h2>Core Formulas</h2>
+  <pre>single_kv_pair_size = 2 × (rope_dim × 2 + (head_dim - rope_dim) × 1)
+swa_per_token = (n_layers × sliding_window × kv_pair_size) / seq_len
+hca_per_token = hca_layers × (kv_pair_size / 128)
+csa_per_token = csa_layers × (kv_pair_size / 4 + indexer_key_size / 4)
+total = SWA + HCA + CSA</pre>
+</BlogLayout>
