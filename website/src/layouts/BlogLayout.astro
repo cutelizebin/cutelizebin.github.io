@@ -1,73 +1,1508 @@
 ---
 export interface Props {
   title: string;
-  description?: string;
+  description: string;
   lang: 'zh' | 'en';
+  category: string;
+  date: string;
+  dateISO?: string;
+  readingTime: number;
+  kind?: 'article' | 'project';
   canonical?: string;
 }
-const { title, description, lang, canonical } = Astro.props;
-const homePath = lang === 'zh' ? '/' : '/en/';
-const homeLabel = lang === 'zh' ? '← 返回主页' : '← Back to Home';
+
+interface ContentItem {
+  path: string;
+  lang: 'zh' | 'en';
+  title: string;
+  category: string;
+  description: string;
+}
+
+const {
+  title,
+  description,
+  lang,
+  category,
+  date,
+  dateISO,
+  readingTime,
+  kind = 'article',
+  canonical,
+} = Astro.props;
+
+const isEn = lang === 'en';
+const homePath = isEn ? '/en/' : '/';
+const currentPath = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const canonicalUrl = canonical ?? new URL(currentPath, Astro.site ?? 'https://cutelizebin.github.io').toString();
+
+const alternatePaths: Record<string, string> = {
+  '/kvcache/': '/kvcache-en/',
+  '/kvcache-en/': '/kvcache/',
+  '/dpu-kata/': '/dpu-kata-en/',
+  '/dpu-kata-en/': '/dpu-kata/',
+  '/blog-dv4-pro-kvcache/': '/blog-dv4-pro-kvcache-en/',
+  '/blog-dv4-pro-kvcache-en/': '/blog-dv4-pro-kvcache/',
+};
+
+const alternatePath = alternatePaths[currentPath] ?? (isEn ? '/' : '/en/');
+const zhHref = isEn ? alternatePath : currentPath;
+const enHref = isEn ? currentPath : alternatePath;
+
+const contentItems: ContentItem[] = [
+  {
+    path: '/blog-dv4-pro-kvcache/',
+    lang: 'zh',
+    title: 'DeepSeek-V4-Pro 每个 token 的 KVCache 大小是多少？',
+    category: '模型分析',
+    description: '从模型结构出发，推导 10.2 KB/token 与 24× 压缩率。',
+  },
+  {
+    path: '/kvcache/',
+    lang: 'zh',
+    title: 'KVCache 存储',
+    category: '项目案例',
+    description: '跨 DRAM 与 SSD 的统一 KVCache 存储，以及面向调度器的全局 metadata。',
+  },
+  {
+    path: '/dpu-kata/',
+    lang: 'zh',
+    title: 'DPU 上的 Kata Runtime 卸载',
+    category: '项目案例',
+    description: '将虚拟化与模拟设备卸载至 DPU，优化高密部署和高并发启动。',
+  },
+  {
+    path: '/blog-dv4-pro-kvcache-en/',
+    lang: 'en',
+    title: 'DeepSeek-V4-Pro: KVCache Size Per Token',
+    category: 'Model Analysis',
+    description: 'Deriving the 10.2 KB/token footprint and its 24× compression ratio.',
+  },
+  {
+    path: '/kvcache-en/',
+    lang: 'en',
+    title: 'KVCache Storage',
+    category: 'Project Case Study',
+    description: 'Unified KVCache storage across DRAM and SSD with global metadata for scheduling.',
+  },
+  {
+    path: '/dpu-kata-en/',
+    lang: 'en',
+    title: 'Kata Runtime Offloading on DPU',
+    category: 'Project Case Study',
+    description: 'Offloading virtualization and emulated devices to a DPU for density and startup efficiency.',
+  },
+];
+
+const languageItems = contentItems.filter((item) => item.lang === lang);
+const currentIndex = languageItems.findIndex((item) => item.path === currentPath);
+const previousItem = currentIndex > 0 ? languageItems[currentIndex - 1] : undefined;
+const nextItem = currentIndex >= 0 && currentIndex < languageItems.length - 1
+  ? languageItems[currentIndex + 1]
+  : undefined;
+const relatedItems = languageItems.filter((item) => item.path !== currentPath).slice(0, 2);
+
+const navItems = isEn
+  ? [
+      { href: `${homePath}#work`, label: 'Work' },
+      { href: `${homePath}#writing`, label: 'Writing' },
+      { href: `${homePath}#experience`, label: 'Experience' },
+      { href: `${homePath}#about`, label: 'About' },
+    ]
+  : [
+      { href: `${homePath}#work`, label: '项目' },
+      { href: `${homePath}#writing`, label: '文章' },
+      { href: `${homePath}#experience`, label: '经历' },
+      { href: `${homePath}#about`, label: '关于' },
+    ];
+
+const schemaType = kind === 'project' ? 'TechArticle' : 'Article';
 ---
 
 <!DOCTYPE html>
 <html lang={lang}>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{title}</title>
-  {description && <meta name="description" content={description}>}
-  {canonical && <link rel="canonical" href={canonical}>}
-  <link rel="icon" href="/favicon.ico">
-  <style>
-    body { padding: 40px; max-width: 800px; margin: 0 auto; line-height: 1.8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: #333; }
-    h1 { margin-bottom: 24px; }
-    h2 { margin-top: 32px; margin-bottom: 16px; }
-    h3 { margin-top: 24px; margin-bottom: 12px; }
-    .back { margin-bottom: 32px; }
-    .back a { color: #2563eb; text-decoration: none; }
-    .back a:hover { text-decoration: underline; }
-    .highlight {
-      background: #dbeafe;
-      border: 2px solid #2563eb;
-      border-radius: 12px;
-      padding: 24px;
-      margin: 24px 0;
-      text-align: center;
-    }
-    .highlight .number {
-      font-size: 48px;
-      font-weight: bold;
-      color: #2563eb;
-    }
-    .highlight .label {
-      font-size: 18px;
-      color: #666;
-      margin-top: 8px;
-    }
-    .highlight .sub {
-      font-size: 16px;
-      color: #666;
-      margin-top: 16px;
-    }
-    ul, ol { padding-left: 24px; }
-    li { margin-bottom: 8px; }
-    code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 14px; }
-    pre { background: #f3f4f6; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 16px 0; }
-    table { border-collapse: collapse; width: 100%; margin: 16px 0; }
-    th, td { border: 1px solid #e5e7eb; padding: 8px 12px; text-align: left; }
-    th { background: #f3f4f6; }
-  </style>
-</head>
-<body>
-  <div class="back">
-    <a href={homePath}>{homeLabel}</a>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} | Zebin Li</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f5f5f7" />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang="zh-CN" href={new URL(zhHref, Astro.site ?? 'https://cutelizebin.github.io').toString()} />
+    <link rel="alternate" hreflang="en" href={new URL(enHref, Astro.site ?? 'https://cutelizebin.github.io').toString()} />
+    <link rel="icon" href="/avatar.jpg" />
 
-  <slot />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content="https://cutelizebin.github.io/avatar.jpg" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="https://cutelizebin.github.io/avatar.jpg" />
 
-  <div class="back">
-    <a href={homePath}>{homeLabel}</a>
-  </div>
-</body>
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': schemaType,
+      headline: title,
+      description,
+      url: canonicalUrl,
+      ...(dateISO ? { datePublished: dateISO } : {}),
+      inLanguage: lang,
+      author: {
+        '@type': 'Person',
+        name: isEn ? 'Zebin Li' : '李泽斌',
+        url: 'https://cutelizebin.github.io',
+      },
+    })}></script>
+  </head>
+
+  <body class={`article-page article-page--${kind}`}>
+    <div class="reading-progress" id="readingProgress" aria-hidden="true"></div>
+
+    <header class="site-header" id="siteHeader">
+      <div class="nav-shell">
+        <a class="brand" href={homePath} aria-label={isEn ? 'Zebin Li home' : '李泽斌主页'}>
+          <span class="brand-mark" aria-hidden="true">Z</span>
+          <span>Zebin Li</span>
+        </a>
+
+        <nav class="desktop-nav" aria-label={isEn ? 'Primary navigation' : '主导航'}>
+          {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
+        </nav>
+
+        <div class="nav-actions">
+          <a class="nav-contact" href="#contact">{isEn ? 'Contact' : '联系我'}</a>
+          <div class="language-switch" aria-label={isEn ? 'Language' : '语言'}>
+            <a href={zhHref} class={!isEn ? 'active' : ''} lang="zh">中</a>
+            <a href={enHref} class={isEn ? 'active' : ''} lang="en">EN</a>
+          </div>
+          <button
+            class="menu-toggle"
+            id="menuToggle"
+            type="button"
+            aria-label={isEn ? 'Open menu' : '打开菜单'}
+            aria-controls="mobileMenu"
+            aria-expanded="false"
+          >
+            <span></span><span></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mobile-menu" id="mobileMenu">
+        <nav aria-label={isEn ? 'Mobile navigation' : '移动端导航'}>
+          {navItems.map((item) => (
+            <a href={item.href}>{item.label}<span aria-hidden="true">↗</span></a>
+          ))}
+          <a href="#contact">{isEn ? 'Contact' : '联系'}<span aria-hidden="true">↓</span></a>
+        </nav>
+        <div class="mobile-language" aria-label={isEn ? 'Language' : '语言'}>
+          <a href={zhHref} class={!isEn ? 'active' : ''} lang="zh">中文</a>
+          <a href={enHref} class={isEn ? 'active' : ''} lang="en">English</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="article-hero">
+        <div class="article-hero-decoration" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="article-hero-inner">
+          <a class="breadcrumb" href={homePath}>
+            <span aria-hidden="true">←</span> {isEn ? 'Home' : '首页'}
+          </a>
+          <div class="article-meta-top">
+            <span>{category}</span>
+            <span aria-hidden="true">·</span>
+            <time datetime={dateISO}>{date}</time>
+            <span aria-hidden="true">·</span>
+            <span>{readingTime} {isEn ? 'min read' : '分钟阅读'}</span>
+          </div>
+          <h1>{title}</h1>
+          <p class="article-description">{description}</p>
+          <div class="article-author">
+            <img src="/avatar.jpg" alt={isEn ? 'Zebin Li' : '李泽斌'} width="44" height="44" />
+            <div>
+              <strong>{isEn ? 'Zebin Li' : '李泽斌'}</strong>
+              <span>{isEn ? 'LLM Inference Infrastructure' : 'LLM 推理基础设施'}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="article-layout">
+        <aside class="toc" id="toc">
+          <div class="toc-inner">
+            <p>{isEn ? 'On this page' : '本页目录'}</p>
+            <nav id="tocList" aria-label={isEn ? 'Table of contents' : '文章目录'}></nav>
+          </div>
+        </aside>
+
+        <div class="article-column">
+          <article class="article-body" id="articleBody">
+            <slot />
+          </article>
+
+          <nav class="article-pagination" aria-label={isEn ? 'Article navigation' : '文章导航'}>
+            {previousItem ? (
+              <a href={previousItem.path} class="pagination-item pagination-item--previous">
+                <small>{isEn ? 'Previous' : '上一篇'}</small>
+                <strong><span aria-hidden="true">←</span> {previousItem.title}</strong>
+              </a>
+            ) : <span></span>}
+            {nextItem ? (
+              <a href={nextItem.path} class="pagination-item pagination-item--next">
+                <small>{isEn ? 'Next' : '下一篇'}</small>
+                <strong>{nextItem.title} <span aria-hidden="true">→</span></strong>
+              </a>
+            ) : <span></span>}
+          </nav>
+        </div>
+      </div>
+
+      <section class="related-section" aria-labelledby="related-title">
+        <div class="section-heading">
+          <p>{isEn ? 'Keep exploring' : '继续探索'}</p>
+          <h2 id="related-title">{isEn ? 'Related work and writing.' : '相关项目与文章。'}</h2>
+        </div>
+        <div class="related-grid">
+          {relatedItems.map((item) => (
+            <a class="related-card" href={item.path}>
+              <span>{item.category}</span>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+              <strong>{isEn ? 'Read more' : '继续阅读'} <span aria-hidden="true">›</span></strong>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <section class="contact-section" id="contact" aria-labelledby="contact-title">
+        <div class="contact-heading">
+          <p>{isEn ? 'Stay in touch' : '保持联系'}</p>
+          <h2 id="contact-title">{isEn ? "Let's talk systems and inference." : '一起聊聊系统与推理。'}</h2>
+        </div>
+        <div class="contact-methods">
+          <button
+            class="contact-method copy-email"
+            type="button"
+            data-email="hellolizebin@foxmail.com"
+            data-copy-label={isEn ? 'Click to copy' : '点击复制'}
+            data-copied-label={isEn ? 'Email copied' : '邮箱已复制'}
+          >
+            <span><small>Email</small><strong>hellolizebin@foxmail.com</strong></span>
+            <em class="copy-label" aria-live="polite">{isEn ? 'Click to copy' : '点击复制'}</em>
+          </button>
+          <a class="contact-method" href="https://www.linkedin.com/in/zebin-li/" target="_blank" rel="noreferrer">
+            <span><small>LinkedIn</small><strong>Zebin Li</strong></span>
+            <em>{isEn ? 'View profile' : '查看主页'} ↗</em>
+          </a>
+          <a class="contact-method" href="https://x.com/Zebin_Li98" target="_blank" rel="noreferrer">
+            <span><small>X</small><strong>@Zebin_Li98</strong></span>
+            <em>{isEn ? 'Follow updates' : '关注动态'} ↗</em>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>© 2026 Zebin Li</span>
+      <div>
+        <a href="https://github.com/cutelizebin" target="_blank" rel="noreferrer">GitHub</a>
+        <a href={homePath}>{isEn ? 'Home' : '首页'}</a>
+        <a href="#">{isEn ? 'Back to top' : '返回顶部'} ↑</a>
+      </div>
+    </footer>
+
+    <script>
+      const siteHeader = document.getElementById('siteHeader');
+      const menuToggle = document.getElementById('menuToggle');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const articleBody = document.getElementById('articleBody');
+      const toc = document.getElementById('toc');
+      const tocList = document.getElementById('tocList');
+      const readingProgress = document.getElementById('readingProgress');
+
+      const closeMenu = () => {
+        mobileMenu?.classList.remove('is-open');
+        menuToggle?.classList.remove('is-open');
+        menuToggle?.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('menu-open');
+      };
+
+      menuToggle?.addEventListener('click', () => {
+        const nextState = !mobileMenu?.classList.contains('is-open');
+        mobileMenu?.classList.toggle('is-open', nextState);
+        menuToggle.classList.toggle('is-open', nextState);
+        menuToggle.setAttribute('aria-expanded', String(nextState));
+        document.body.classList.toggle('menu-open', nextState);
+      });
+
+      mobileMenu?.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeMenu();
+      });
+
+      const updateHeader = () => {
+        siteHeader?.classList.toggle('is-scrolled', window.scrollY > 12);
+      };
+
+      const slugify = (value: string, index: number) => {
+        const slug = value
+          .trim()
+          .toLowerCase()
+          .replace(/[^\p{Letter}\p{Number}]+/gu, '-')
+          .replace(/^-+|-+$/g, '');
+        return slug || `section-${index + 1}`;
+      };
+
+      if (articleBody && tocList) {
+        const headings = Array.from(articleBody.querySelectorAll<HTMLElement>('h2, h3'));
+        const usedIds = new Set<string>();
+
+        headings.forEach((heading, index) => {
+          const baseId = heading.id || slugify(heading.textContent || '', index);
+          let finalId = baseId;
+          let suffix = 2;
+          while (usedIds.has(finalId)) finalId = `${baseId}-${suffix++}`;
+          usedIds.add(finalId);
+          heading.id = finalId;
+
+          const link = document.createElement('a');
+          link.href = `#${finalId}`;
+          link.textContent = heading.textContent || '';
+          link.className = heading.tagName === 'H3' ? 'toc-link toc-link--nested' : 'toc-link';
+          tocList.appendChild(link);
+        });
+
+        if (headings.length === 0) toc?.classList.add('is-empty');
+
+        if ('IntersectionObserver' in window && headings.length > 0) {
+          const tocLinks = Array.from(tocList.querySelectorAll<HTMLAnchorElement>('.toc-link'));
+          const headingObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              tocLinks.forEach((link) => {
+                link.classList.toggle('active', link.hash === `#${entry.target.id}`);
+              });
+            });
+          }, { rootMargin: '-18% 0px -72% 0px' });
+          headings.forEach((heading) => headingObserver.observe(heading));
+        }
+      }
+
+      const copyText = async (value: string) => {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(value);
+          return;
+        }
+        const input = document.createElement('textarea');
+        input.value = value;
+        input.setAttribute('readonly', '');
+        input.style.position = 'fixed';
+        input.style.opacity = '0';
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        input.remove();
+      };
+
+      document.querySelectorAll<HTMLButtonElement>('.copy-email').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const email = button.dataset.email;
+          const label = button.querySelector<HTMLElement>('.copy-label');
+          if (!email || !label) return;
+          try {
+            await copyText(email);
+            label.textContent = button.dataset.copiedLabel || 'Copied';
+            button.classList.add('is-copied');
+            window.setTimeout(() => {
+              label.textContent = button.dataset.copyLabel || 'Copy';
+              button.classList.remove('is-copied');
+            }, 1800);
+          } catch {
+            label.textContent = email;
+          }
+        });
+      });
+
+      articleBody?.querySelectorAll<HTMLPreElement>('pre').forEach((pre) => {
+        const shell = document.createElement('div');
+        shell.className = 'code-shell';
+        pre.before(shell);
+        shell.appendChild(pre);
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'copy-code';
+        button.textContent = document.documentElement.lang === 'en' ? 'Copy' : '复制';
+        button.addEventListener('click', async () => {
+          await copyText(pre.innerText);
+          button.textContent = document.documentElement.lang === 'en' ? 'Copied' : '已复制';
+          window.setTimeout(() => {
+            button.textContent = document.documentElement.lang === 'en' ? 'Copy' : '复制';
+          }, 1600);
+        });
+        shell.appendChild(button);
+      });
+
+      articleBody?.querySelectorAll<HTMLTableElement>('table').forEach((table) => {
+        const shell = document.createElement('div');
+        shell.className = 'table-shell';
+        table.before(shell);
+        shell.appendChild(table);
+      });
+
+      const updateScrollState = () => {
+        updateHeader();
+        if (!articleBody || !readingProgress) return;
+        const articleTop = articleBody.getBoundingClientRect().top + window.scrollY;
+        const distance = articleBody.offsetHeight - window.innerHeight + 180;
+        const progress = Math.min(1, Math.max(0, (window.scrollY - articleTop + 180) / Math.max(distance, 1)));
+        readingProgress.style.transform = `scaleX(${progress})`;
+      };
+
+      updateScrollState();
+      window.addEventListener('scroll', updateScrollState, { passive: true });
+    </script>
+
+    <style is:global>
+      :root {
+        color-scheme: light;
+        --page: #f5f5f7;
+        --surface: #ffffff;
+        --surface-dark: #101114;
+        --ink: #1d1d1f;
+        --muted: #6e6e73;
+        --soft: #86868b;
+        --line: rgba(29, 29, 31, 0.11);
+        --blue: #0071e3;
+        --blue-hover: #0077ed;
+        --container: 1120px;
+        --reading-width: 760px;
+        --nav-height: 52px;
+        --radius-large: 32px;
+        --radius-medium: 22px;
+        --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      * { box-sizing: border-box; }
+
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 92px;
+        background: var(--page);
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        background: var(--page);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        font-size: 17px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      body.menu-open { overflow: hidden; }
+      a { color: inherit; }
+      button, a { -webkit-tap-highlight-color: transparent; }
+
+      .reading-progress {
+        position: fixed;
+        inset: 0 0 auto;
+        z-index: 200;
+        height: 2px;
+        background: var(--blue);
+        transform: scaleX(0);
+        transform-origin: left center;
+        will-change: transform;
+      }
+
+      .site-header {
+        position: fixed;
+        inset: 0 0 auto;
+        z-index: 100;
+        height: var(--nav-height);
+        color: rgba(29, 29, 31, 0.88);
+        transition: background-color 240ms ease, border-color 240ms ease;
+      }
+
+      .site-header.is-scrolled,
+      .site-header:has(.mobile-menu.is-open) {
+        background: rgba(250, 250, 252, 0.82);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+      }
+
+      .nav-shell {
+        width: min(calc(100% - 40px), var(--container));
+        height: 100%;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+      }
+
+      .brand {
+        width: max-content;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        text-decoration: none;
+      }
+
+      .brand-mark {
+        width: 24px;
+        height: 24px;
+        display: grid;
+        place-items: center;
+        border-radius: 8px;
+        background: var(--ink);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .desktop-nav {
+        display: flex;
+        align-items: center;
+        gap: 36px;
+      }
+
+      .desktop-nav a {
+        color: rgba(29, 29, 31, 0.72);
+        font-size: 13px;
+        text-decoration: none;
+        transition: color 180ms ease;
+      }
+
+      .desktop-nav a:hover { color: var(--ink); }
+
+      .nav-actions {
+        justify-self: end;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .nav-contact {
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 15px;
+        border-radius: 980px;
+        background: var(--blue);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background-color 180ms ease, transform 180ms ease;
+      }
+
+      .nav-contact:hover {
+        background: var(--blue-hover);
+        transform: translateY(-1px);
+      }
+
+      .language-switch {
+        display: flex;
+        gap: 2px;
+        padding: 2px;
+        border-radius: 8px;
+        background: rgba(118, 118, 128, 0.12);
+      }
+
+      .language-switch a {
+        min-width: 30px;
+        padding: 3px 6px;
+        border-radius: 6px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 600;
+        line-height: 18px;
+        text-align: center;
+        text-decoration: none;
+      }
+
+      .language-switch a.active {
+        background: #fff;
+        color: var(--ink);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.11);
+      }
+
+      .menu-toggle,
+      .mobile-menu { display: none; }
+
+      .article-hero {
+        position: relative;
+        min-height: 650px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        padding: 130px 0 90px;
+        background:
+          radial-gradient(circle at 82% 38%, rgba(113, 186, 255, 0.2), transparent 28%),
+          radial-gradient(circle at 68% 80%, rgba(179, 157, 255, 0.16), transparent 28%);
+      }
+
+      .article-page--project .article-hero {
+        background:
+          radial-gradient(circle at 82% 38%, rgba(113, 186, 255, 0.24), transparent 29%),
+          radial-gradient(circle at 70% 82%, rgba(179, 157, 255, 0.2), transparent 29%);
+      }
+
+      .article-hero-inner {
+        position: relative;
+        z-index: 2;
+        width: min(calc(100% - 40px), 980px);
+        margin: 0 auto;
+      }
+
+      .breadcrumb {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 42px;
+        color: var(--muted);
+        font-size: 13px;
+        text-decoration: none;
+      }
+
+      .breadcrumb:hover { color: var(--blue); }
+
+      .article-meta-top {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 20px;
+        color: var(--blue);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .article-meta-top span[aria-hidden="true"] { color: var(--soft); }
+
+      .article-hero h1 {
+        max-width: 900px;
+        margin: 0;
+        font-size: clamp(48px, 6.2vw, 76px);
+        font-weight: 700;
+        letter-spacing: -0.058em;
+        line-height: 1.02;
+        text-wrap: balance;
+      }
+
+      .article-description {
+        max-width: 740px;
+        margin: 28px 0 0;
+        color: var(--muted);
+        font-size: clamp(19px, 2vw, 23px);
+        letter-spacing: -0.02em;
+        line-height: 1.48;
+      }
+
+      .article-author {
+        margin-top: 36px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .article-author img {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        object-fit: cover;
+      }
+
+      .article-author strong,
+      .article-author span { display: block; }
+
+      .article-author strong {
+        font-size: 14px;
+        letter-spacing: -0.01em;
+      }
+
+      .article-author span {
+        margin-top: 1px;
+        color: var(--soft);
+        font-size: 12px;
+      }
+
+      .article-hero-decoration {
+        position: absolute;
+        right: max(5vw, calc((100vw - 1120px) / 2));
+        bottom: 90px;
+        width: 310px;
+        height: 230px;
+        opacity: 0.45;
+        transform: perspective(700px) rotateX(58deg) rotateZ(-34deg);
+      }
+
+      .article-hero-decoration span {
+        position: absolute;
+        right: 0;
+        width: 220px;
+        height: 78px;
+        border: 1px solid rgba(0, 113, 227, 0.18);
+        border-radius: 22px;
+        background:
+          linear-gradient(rgba(0, 113, 227, 0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 113, 227, 0.08) 1px, transparent 1px),
+          rgba(255, 255, 255, 0.62);
+        background-size: 14px 14px;
+        box-shadow: 0 24px 48px rgba(31, 50, 81, 0.12);
+      }
+
+      .article-hero-decoration span:nth-child(1) { top: 0; transform: translateZ(72px); }
+      .article-hero-decoration span:nth-child(2) { top: 66px; transform: translateZ(36px); }
+      .article-hero-decoration span:nth-child(3) { top: 132px; }
+
+      .article-layout {
+        width: min(calc(100% - 40px), 1040px);
+        margin: 0 auto;
+        padding: 100px 0 0;
+        display: grid;
+        grid-template-columns: 200px minmax(0, var(--reading-width));
+        justify-content: space-between;
+        gap: 72px;
+      }
+
+      .toc-inner {
+        position: sticky;
+        top: 92px;
+      }
+
+      .toc.is-empty { visibility: hidden; }
+
+      .toc-inner > p {
+        margin: 0 0 16px;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      #tocList {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding-left: 13px;
+        border-left: 1px solid var(--line);
+      }
+
+      .toc-link {
+        display: block;
+        padding: 5px 0;
+        color: var(--soft);
+        font-size: 12px;
+        line-height: 1.45;
+        text-decoration: none;
+        transition: color 180ms ease, transform 180ms ease;
+      }
+
+      .toc-link--nested { padding-left: 10px; }
+
+      .toc-link:hover,
+      .toc-link.active {
+        color: var(--blue);
+        transform: translateX(2px);
+      }
+
+      .article-column { min-width: 0; }
+
+      .article-body {
+        color: #2f3033;
+        font-size: 18px;
+        line-height: 1.82;
+      }
+
+      .article-body > :first-child { margin-top: 0; }
+
+      .article-body h2,
+      .article-body h3 {
+        color: var(--ink);
+        scroll-margin-top: 96px;
+        text-wrap: balance;
+      }
+
+      .article-body h2 {
+        margin: 76px 0 22px;
+        font-size: 34px;
+        font-weight: 680;
+        letter-spacing: -0.042em;
+        line-height: 1.16;
+      }
+
+      .article-body h3 {
+        margin: 48px 0 16px;
+        font-size: 24px;
+        font-weight: 650;
+        letter-spacing: -0.025em;
+        line-height: 1.25;
+      }
+
+      .article-body p { margin: 0 0 22px; }
+
+      .article-body a {
+        color: var(--blue);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+
+      .article-body strong {
+        color: var(--ink);
+        font-weight: 650;
+      }
+
+      .article-body ul,
+      .article-body ol {
+        margin: 0 0 28px;
+        padding-left: 1.35em;
+      }
+
+      .article-body li {
+        margin-bottom: 10px;
+        padding-left: 5px;
+      }
+
+      .article-body li::marker { color: var(--blue); }
+
+      .article-body blockquote {
+        margin: 34px 0;
+        padding: 2px 0 2px 24px;
+        border-left: 3px solid var(--blue);
+        color: var(--muted);
+        font-size: 20px;
+        line-height: 1.65;
+      }
+
+      .article-body code {
+        padding: 0.16em 0.4em;
+        border-radius: 6px;
+        background: rgba(118, 118, 128, 0.11);
+        color: #a13b56;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 0.86em;
+      }
+
+      .code-shell {
+        position: relative;
+        margin: 32px 0;
+      }
+
+      .article-body pre {
+        margin: 0;
+        padding: 28px;
+        overflow-x: auto;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 18px;
+        background: #151619;
+        box-shadow: 0 16px 38px rgba(0, 0, 0, 0.09);
+        color: #e9e9eb;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 14px;
+        line-height: 1.7;
+        tab-size: 2;
+      }
+
+      .article-body pre code {
+        padding: 0;
+        background: transparent;
+        color: inherit;
+        font-size: inherit;
+      }
+
+      .copy-code {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 2;
+        min-width: 48px;
+        padding: 6px 9px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.66);
+        font: inherit;
+        font-size: 11px;
+        cursor: pointer;
+      }
+
+      .copy-code:hover {
+        background: rgba(255, 255, 255, 0.14);
+        color: #fff;
+      }
+
+      .table-shell {
+        margin: 32px 0;
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fff;
+      }
+
+      .article-body table {
+        width: 100%;
+        min-width: 520px;
+        border-collapse: collapse;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .article-body th,
+      .article-body td {
+        padding: 15px 18px;
+        border: 0;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .article-body tr:last-child td { border-bottom: 0; }
+
+      .article-body th {
+        background: #f0f1f3;
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .article-body tbody tr:hover { background: rgba(0, 113, 227, 0.035); }
+
+      .article-body .highlight {
+        margin: 36px 0 52px;
+        padding: 42px 36px;
+        border: 1px solid rgba(0, 113, 227, 0.14);
+        border-radius: 26px;
+        background:
+          radial-gradient(circle at 82% 20%, rgba(123, 181, 255, 0.26), transparent 34%),
+          linear-gradient(145deg, #f2f8ff 0%, #f8f6ff 100%);
+        text-align: center;
+      }
+
+      .article-body .highlight .number {
+        color: var(--blue);
+        font-size: clamp(42px, 6vw, 64px);
+        font-weight: 700;
+        letter-spacing: -0.06em;
+        line-height: 1;
+      }
+
+      .article-body .highlight .label {
+        margin-top: 12px;
+        color: var(--ink);
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .article-body .highlight .sub {
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .article-body .callout {
+        margin: 30px 0;
+        padding: 22px 24px;
+        border-left: 3px solid var(--blue);
+        border-radius: 0 14px 14px 0;
+        background: #edf6ff;
+      }
+
+      .article-pagination {
+        margin-top: 86px;
+        padding-top: 28px;
+        border-top: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+      }
+
+      .pagination-item {
+        min-width: 0;
+        text-decoration: none;
+      }
+
+      .pagination-item--next { text-align: right; }
+
+      .pagination-item small,
+      .pagination-item strong { display: block; }
+
+      .pagination-item small {
+        margin-bottom: 6px;
+        color: var(--soft);
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .pagination-item strong {
+        color: var(--ink);
+        font-size: 15px;
+        line-height: 1.45;
+        transition: color 180ms ease;
+      }
+
+      .pagination-item:hover strong { color: var(--blue); }
+
+      .related-section {
+        width: min(calc(100% - 40px), var(--container));
+        margin: 0 auto;
+        padding: 150px 0 0;
+      }
+
+      .section-heading { max-width: 720px; }
+
+      .section-heading > p,
+      .contact-heading > p {
+        margin: 0 0 12px;
+        color: var(--blue);
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .section-heading h2,
+      .contact-heading h2 {
+        margin: 0;
+        font-size: clamp(38px, 4.8vw, 56px);
+        font-weight: 680;
+        letter-spacing: -0.052em;
+        line-height: 1.06;
+        text-wrap: balance;
+      }
+
+      .related-grid {
+        margin-top: 42px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      .related-card {
+        min-height: 330px;
+        display: flex;
+        flex-direction: column;
+        padding: 36px;
+        border-radius: var(--radius-medium);
+        background: #fff;
+        text-decoration: none;
+        transition: transform 240ms var(--ease), box-shadow 240ms ease;
+      }
+
+      .related-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 50px rgba(28, 36, 48, 0.08);
+      }
+
+      .related-card > span {
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .related-card h3 {
+        margin: 18px 0 0;
+        font-size: 28px;
+        font-weight: 650;
+        letter-spacing: -0.04em;
+        line-height: 1.12;
+        text-wrap: balance;
+      }
+
+      .related-card p {
+        margin: 16px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.55;
+      }
+
+      .related-card > strong {
+        margin-top: auto;
+        padding-top: 26px;
+        color: var(--blue);
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .related-card > strong span {
+        display: inline-block;
+        transition: transform 180ms ease;
+      }
+
+      .related-card:hover > strong span { transform: translateX(3px); }
+
+      .contact-section {
+        width: min(calc(100% - 40px), var(--container));
+        margin: 140px auto 0;
+        padding: 64px;
+        border-radius: var(--radius-large);
+        background:
+          radial-gradient(circle at 94% 6%, rgba(0, 113, 227, 0.3), transparent 30%),
+          radial-gradient(circle at 4% 100%, rgba(115, 84, 255, 0.18), transparent 34%),
+          var(--surface-dark);
+        color: #f5f5f7;
+      }
+
+      .contact-heading { max-width: 760px; }
+
+      .contact-heading > p { color: #5eb0ff; }
+
+      .contact-methods {
+        margin-top: 48px;
+        display: grid;
+        grid-template-columns: 1.2fr 0.9fr 0.9fr;
+        gap: 12px;
+      }
+
+      .contact-method {
+        width: 100%;
+        min-width: 0;
+        min-height: 170px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-direction: column;
+        padding: 26px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #f5f5f7;
+        font: inherit;
+        text-align: left;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 220ms ease, border-color 220ms ease, transform 220ms var(--ease);
+      }
+
+      .contact-method:hover {
+        border-color: rgba(255, 255, 255, 0.22);
+        background: rgba(255, 255, 255, 0.12);
+        transform: translateY(-3px);
+      }
+
+      .contact-method span,
+      .contact-method small,
+      .contact-method strong { display: block; }
+
+      .contact-method small {
+        margin-bottom: 9px;
+        color: rgba(255, 255, 255, 0.48);
+        font-size: 11px;
+        font-weight: 650;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .contact-method strong {
+        overflow-wrap: anywhere;
+        color: #fff;
+        font-size: 21px;
+        font-weight: 600;
+        letter-spacing: -0.035em;
+        line-height: 1.15;
+      }
+
+      .contact-method:first-child strong { font-size: clamp(16px, 1.6vw, 20px); }
+
+      .contact-method em {
+        color: #5eb0ff;
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 600;
+      }
+
+      .contact-method.is-copied {
+        border-color: rgba(76, 217, 140, 0.42);
+        background: rgba(48, 164, 108, 0.16);
+      }
+
+      .contact-method.is-copied em { color: #78e6a8; }
+
+      .site-footer {
+        width: min(calc(100% - 40px), var(--container));
+        margin: 0 auto;
+        padding: 34px 0 42px;
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        color: var(--soft);
+        font-size: 12px;
+      }
+
+      .site-footer div { display: flex; gap: 22px; }
+
+      .site-footer a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+
+      .site-footer a:hover { color: var(--ink); }
+
+      @media (max-width: 1120px) {
+        .article-hero-decoration { opacity: 0.28; }
+
+        .article-layout {
+          width: min(calc(100% - 48px), 860px);
+          grid-template-columns: 160px minmax(0, 680px);
+          gap: 40px;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .article-hero-decoration { display: none; }
+
+        .article-layout {
+          width: min(calc(100% - 40px), var(--reading-width));
+          display: block;
+        }
+
+        .toc { display: none; }
+
+        .contact-section { padding: 48px 36px; }
+
+        .contact-methods { grid-template-columns: 1fr; }
+
+        .contact-method { min-height: 145px; }
+      }
+
+      @media (max-width: 720px) {
+        :root {
+          --radius-large: 24px;
+          --radius-medium: 20px;
+        }
+
+        .nav-shell,
+        .article-hero-inner,
+        .article-layout,
+        .related-section,
+        .contact-section,
+        .site-footer {
+          width: min(calc(100% - 32px), var(--container));
+        }
+
+        .nav-shell { grid-template-columns: 1fr auto; }
+        .desktop-nav, .language-switch { display: none; }
+
+        .menu-toggle {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          cursor: pointer;
+        }
+
+        .menu-toggle span {
+          width: 17px;
+          height: 1px;
+          background: var(--ink);
+          transition: transform 220ms ease;
+        }
+
+        .menu-toggle.is-open span:first-child { transform: translateY(3px) rotate(45deg); }
+        .menu-toggle.is-open span:last-child { transform: translateY(-3px) rotate(-45deg); }
+
+        .mobile-menu {
+          position: fixed;
+          top: var(--nav-height);
+          right: 0;
+          left: 0;
+          height: calc(100dvh - var(--nav-height));
+          display: block;
+          padding: 34px 24px;
+          background: rgba(250, 250, 252, 0.96);
+          backdrop-filter: blur(24px);
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(-8px);
+          transition: opacity 220ms ease, transform 220ms ease, visibility 220ms;
+        }
+
+        .mobile-menu.is-open {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+
+        .mobile-menu nav { display: flex; flex-direction: column; }
+
+        .mobile-menu a {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 0;
+          border-bottom: 1px solid var(--line);
+          font-size: 28px;
+          font-weight: 600;
+          letter-spacing: -0.04em;
+          text-decoration: none;
+        }
+
+        .mobile-menu a span { color: var(--soft); font-size: 18px; }
+
+        .mobile-language {
+          margin-top: 30px;
+          display: flex;
+          gap: 10px;
+        }
+
+        .mobile-language a {
+          min-height: 36px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0 14px;
+          border: 1px solid var(--line);
+          border-radius: 980px;
+          color: var(--muted);
+          font-size: 13px;
+          font-weight: 500;
+          letter-spacing: 0;
+        }
+
+        .mobile-language a.active {
+          border-color: var(--ink);
+          background: var(--ink);
+          color: #fff;
+        }
+
+        .article-hero {
+          min-height: auto;
+          padding: 108px 0 68px;
+        }
+
+        .breadcrumb { margin-bottom: 32px; }
+
+        .article-hero h1 {
+          font-size: clamp(40px, 12vw, 56px);
+          letter-spacing: -0.055em;
+        }
+
+        .article-description {
+          margin-top: 22px;
+          font-size: 18px;
+        }
+
+        .article-author { margin-top: 28px; }
+
+        .article-layout { padding-top: 68px; }
+
+        .article-body {
+          font-size: 17px;
+          line-height: 1.78;
+        }
+
+        .article-body h2 {
+          margin-top: 60px;
+          font-size: 30px;
+        }
+
+        .article-body h3 {
+          margin-top: 40px;
+          font-size: 22px;
+        }
+
+        .article-body pre {
+          padding: 24px 20px;
+          font-size: 12px;
+        }
+
+        .article-body .highlight {
+          padding: 34px 20px;
+          border-radius: 22px;
+        }
+
+        .article-pagination {
+          margin-top: 64px;
+          grid-template-columns: 1fr;
+        }
+
+        .pagination-item--next { text-align: left; }
+
+        .related-section { padding-top: 110px; }
+
+        .related-grid {
+          margin-top: 30px;
+          grid-template-columns: 1fr;
+          gap: 14px;
+        }
+
+        .related-card {
+          min-height: 280px;
+          padding: 30px;
+        }
+
+        .contact-section {
+          margin-top: 96px;
+          padding: 40px 24px 26px;
+        }
+
+        .contact-methods { margin-top: 34px; }
+
+        .contact-method {
+          min-height: 145px;
+          padding: 23px;
+        }
+
+        .contact-method:first-child strong { font-size: 16px; }
+
+        .site-footer {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+
+      @media print {
+        .site-header,
+        .reading-progress,
+        .toc,
+        .article-pagination,
+        .related-section,
+        .contact-section,
+        .site-footer { display: none !important; }
+
+        .article-hero {
+          min-height: 0;
+          padding: 20px 0 40px;
+          background: none;
+        }
+
+        .article-layout {
+          width: 100%;
+          display: block;
+          padding: 0;
+        }
+
+        .article-body { color: #000; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after {
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+        }
+      }
+    </style>
+  </body>
 </html>

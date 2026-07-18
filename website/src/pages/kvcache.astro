@@ -2,9 +2,15 @@
 import BlogLayout from '../layouts/BlogLayout.astro';
 ---
 
-<BlogLayout title="KVCache 存储 - 项目详情" lang="zh">
-  <h1>KVCache 存储</h1>
-
+<BlogLayout
+  title="KVCache 存储"
+  description="跨 DRAM 与 SSD 统一管理 KVCache，并向调度器提供全局 metadata，实现 KVCache-aware scheduling。"
+  lang="zh"
+  category="项目案例"
+  date="2025 — 至今"
+  readingTime={2}
+  kind="project"
+>
   <h2>项目目标</h2>
   <p>
     统一管理 DRAM/SSD 上的 KVCache，作为独立的组件 daemon，与推理框架（vLLM/sglang/MiniMax 内部框架）解耦，同时上报 KVCache metadata 给调度器做 KVCache-aware 调度。

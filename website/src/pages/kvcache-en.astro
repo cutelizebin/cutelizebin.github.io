@@ -2,9 +2,15 @@
 import BlogLayout from '../layouts/BlogLayout.astro';
 ---
 
-<BlogLayout title="KVCache Storage - Project Details" lang="en">
-  <h1>KVCache Storage</h1>
-
+<BlogLayout
+  title="KVCache Storage"
+  description="Unified KVCache management across DRAM and SSD, with global metadata for cache-aware scheduling."
+  lang="en"
+  category="Project Case Study"
+  date="2025 — Present"
+  readingTime={2}
+  kind="project"
+>
   <h2>Goal</h2>
   <p>
     Unified management of KVCache on DRAM/SSD, as an independent daemon, decoupled from inference frameworks (vLLM/sglang/MiniMax internal framework), while reporting KVCache metadata to scheduler for KVCache-aware scheduling.
