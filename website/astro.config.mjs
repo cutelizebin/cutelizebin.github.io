@@ -8,6 +8,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'cutelizebin',
+      favicon: '/favicon.png',
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/cutelizebin' },
         { icon: 'x.com', label: 'X (Twitter)', href: 'https://x.com/Zebin_Li98' },
