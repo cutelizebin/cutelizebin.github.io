@@ -85,7 +85,7 @@ import HomeLayout from '../layouts/HomeLayout.astro';
             <h3>DeepSeek-V4-Pro 的 KVCache</h3>
             <span class="card-link">阅读推导 <span aria-hidden="true">›</span></span>
           </div>
-          <div class="metric" aria-hidden="true">10.2 KB<small>每 token · 24× 压缩率</small></div>
+          <div class="metric" aria-hidden="true">9.625 KiB<small>BF16 均值 · 1 Mi token</small></div>
         </a>
 
         <a class="project-card dpu-card reveal" href="/dpu-kata/">
@@ -121,7 +121,7 @@ import HomeLayout from '../layouts/HomeLayout.astro';
         <a class="article-card article-card--accent reveal" href="/blog-dv4-pro-kvcache/">
           <p class="article-meta">2026.05 · 模型分析</p>
           <h3>DeepSeek-V4-Pro 每个 token 的 KVCache 大小是多少？</h3>
-          <p>从结构参数出发，推导 10.2 KB/token 与 24× 压缩率。</p>
+          <p>推导 1 Mi token 上下文下的 9.625 KiB/token（BF16），并解释 FP8/FP4 如何接近 GQA8 基线的 2%。</p>
           <span class="card-link">阅读全文 <span aria-hidden="true">›</span></span>
         </a>
 

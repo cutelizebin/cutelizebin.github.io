@@ -4,81 +4,95 @@ import BlogLayout from '../layouts/BlogLayout.astro';
 
 <BlogLayout
   title="DeepSeek-V4-Pro: KVCache Size Per Token"
-  description="DeepSeek-V4-Pro KVCache size calculation, core formulas and derivation"
+  description="Deriving DeepSeek-V4-Pro KVCache at a 1 Mi-token context: about 9.625 GiB in BF16, with the FP8/FP4 and GQA8 comparison explained"
   lang="en"
   category="Model Analysis"
-  date="May 2026"
+  date="May 2026 · revised August 2026"
   dateISO="2026-05-01"
-  readingTime={5}
+  readingTime={7}
   canonical="https://cutelizebin.github.io/blog-dv4-pro-kvcache-en/"
 >
   <div class="highlight">
-    <div class="number">10.2 KB/token</div>
-    <div class="label">KVCache Size Per Token</div>
-    <div class="sub">1M context ≈ 10.9 MB · 24x compression vs BF16 GQA8</div>
+    <div class="number">9.625 KiB/token</div>
+    <div class="label">BF16 architecture estimate at 1 Mi tokens</div>
+    <div class="sub">≈ 9.625 GiB total · FP8/FP4 deployment roughly halves it again</div>
   </div>
 
   <h2>Conclusion</h2>
   <ul>
-    <li><strong>KVCache per token: 10.2 KB</strong></li>
-    <li>1M context total: ≈ 10.9 MB</li>
-    <li>vs BF16 GQA8 baseline (single layer 4,096 bytes/token): <strong>24x compression</strong></li>
-    <li>With FP4 indexer: up to <strong>31x</strong>, close to paper's 2% claim</li>
+    <li>At a context length of <strong>1,048,576 tokens</strong>, the BF16 architecture estimate is <strong>9.625 GiB</strong>, or an average of <strong>9.625 KiB/token</strong>.</li>
+    <li>vLLM reports that using predominantly FP8 mixed storage for the main-attention cache and FP4 for the indexer cache saves <strong>roughly another 2×</strong> over the BF16 estimate, putting the deployment-level estimate near 4.8 GiB; the exact number is implementation-dependent.</li>
+    <li>Against a 61-layer BF16 GQA8 baseline with 8 KV heads and a 128-dimensional head, the BF16 estimate is <strong>25.35× smaller</strong>. FP8/FP4 brings the estimate to roughly <strong>50× smaller</strong>, or about 2% of the baseline.</li>
+    <li>The previous derivation treated the shared key/value vector as a separate KV pair and also labeled GiB as MB. This revision uses binary units and a reproducible comparison.</li>
+  </ul>
+
+  <h2>Sources and Scope</h2>
+  <ul>
+    <li>Model parameters come from the official <a href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro/blob/main/config.json" target="_blank" rel="noreferrer">DeepSeek-V4-Pro configuration</a>.</li>
+    <li>The CSA, HCA, and hybrid-attention design comes from the <a href="https://arxiv.org/abs/2606.19348" target="_blank" rel="noreferrer">DeepSeek-V4 technical report</a>.</li>
+    <li>The shared-KV design, the 9.62 GiB BF16 arithmetic, and the FP8/FP4 deployment estimate follow <a href="https://vllm.ai/blog/2026-04-24/deepseek-v4" target="_blank" rel="noreferrer">vLLM's implementation note</a>.</li>
+    <li>The calculation covers the architecture-level cache payload for one sequence. It excludes implementation-specific compressor runtime state, block padding, quantization scales, allocator metadata, and temporary workspace. Last verified: 2026-08-01.</li>
   </ul>
 
   <h2>Key Parameters</h2>
   <table>
     <tr><th>Parameter</th><th>Value</th></tr>
     <tr><td>head_dim</td><td>512</td></tr>
+    <tr><td>index_head_dim</td><td>128</td></tr>
     <tr><td>qk_rope_head_dim</td><td>64</td></tr>
     <tr><td>num_key_value_heads</td><td>1</td></tr>
     <tr><td>num_hidden_layers</td><td>61</td></tr>
     <tr><td>sliding_window</td><td>128</td></tr>
+    <tr><td>max_position_embeddings</td><td>1,048,576</td></tr>
   </table>
 
   <h3>Compression Strategy</h3>
-  <p>First 2 layers = 128 (HCA), then alternating: even index = 4 (CSA), odd index = 128 (HCA)</p>
-  <p>Layer count: HCA = 31 layers, CSA = 30 layers</p>
+  <p>The official <code>compress_ratios</code> list starts with two 128× layers and then alternates between 4× and 128×. The 61-layer stack therefore contains 30 c4a (CSA) layers and 31 c128a (HCA) layers. Every layer also keeps a 128-token uncompressed sliding-window branch.</p>
 
-  <h2>Single KV Pair Size (Mixed Precision)</h2>
+  <h2>Why One Cached Entry Is 1,024 Bytes</h2>
+  <p>DeepSeek-V4 shares the key and value vectors in its main attention path. Each compressed or sliding-window entry therefore stores one 512-dimensional vector, not a separate key and value pair. In BF16:</p>
   <ul>
-    <li>RoPE part: 64 dims × 2 bytes (BF16) = 128 bytes</li>
-    <li>Non-RoPE part: (512 - 64) = 448 dims × 1 byte (FP8) = 448 bytes</li>
-    <li>Single Key or Value = 128 + 448 = 576 bytes</li>
-    <li>One KV pair (MQA, 1 group) = 576 × 2 = <strong>1,152 bytes</strong></li>
+    <li>Main-attention shared-KV entry: 512 × 2 bytes = <strong>1,024 bytes</strong></li>
+    <li>CSA-only indexer entry: 128 × 2 bytes = <strong>256 bytes</strong></li>
   </ul>
 
-  <h2>Component Calculations</h2>
+  <h2>BF16 Component Calculations</h2>
+  <p>Let the context length be <code>N = 1,048,576</code>.</p>
 
-  <h3>1. SWA (Sliding Window, Fixed Cache Amortization)</h3>
-  <pre>SWA fixed cache = 61 layers × 128 pairs × 1,152 bytes = 8,994,816 bytes
-SWA per token (1M context) = 8,994,816 / 1,048,576 = 9.0 bytes</pre>
+  <h3>1. SWA (128 Fixed Entries Per Layer)</h3>
+  <pre>SWA fixed cache = 61 × 128 × 1,024 = 7,995,392 bytes
+SWA average per token = 7,995,392 / N = 7.625 bytes/token</pre>
 
-  <h3>2. HCA (31 layers)</h3>
-  <pre>HCA per token per layer = 1,152 / 128 = 9 bytes
-HCA total = 31 × 9 = 279 bytes/token</pre>
+  <h3>2. CSA / c4a (30 Layers)</h3>
+  <pre>Main attention = 30 × (N / 4) × 1,024 / N = 7,680 bytes/token
+Indexer = 30 × (N / 4) × 256 / N = 1,920 bytes/token
+CSA total = 9,600 bytes/token</pre>
 
-  <h3>3. CSA (30 layers)</h3>
-  <pre>CSA main KV per token per layer = 1,152 / 4 = 288 bytes
-Indexer key size = 64 × 2 + (128 - 64) × 1 = 192 bytes
-CSA indexer key per token per layer = 192 / 4 = 48 bytes
-Per CSA layer total = 288 + 48 = 336 bytes/token
-CSA total = 30 × 336 = 10,080 bytes/token</pre>
+  <h3>3. HCA / c128a (31 Layers)</h3>
+  <pre>HCA = 31 × (N / 128) × 1,024 / N
+    = 248 bytes/token</pre>
 
   <h2>Summary</h2>
   <table>
     <tr><th>Component</th><th>Per Token</th><th>Share</th></tr>
-    <tr><td>SWA @ 1M</td><td>9.0 bytes</td><td>0.09%</td></tr>
-    <tr><td>HCA</td><td>279 bytes</td><td>2.69%</td></tr>
-    <tr><td>CSA main KV</td><td>8,640 bytes</td><td>83.33%</td></tr>
-    <tr><td>CSA indexer key</td><td>1,440 bytes</td><td>13.89%</td></tr>
-    <tr><td><strong>Total</strong></td><td><strong>10,368 bytes ≈ 10.2 KB/token</strong></td><td>100%</td></tr>
+    <tr><td>SWA @ 1 Mi tokens</td><td>7.625 bytes</td><td>0.08%</td></tr>
+    <tr><td>CSA main attention</td><td>7,680 bytes</td><td>77.93%</td></tr>
+    <tr><td>CSA indexer</td><td>1,920 bytes</td><td>19.48%</td></tr>
+    <tr><td>HCA main attention</td><td>248 bytes</td><td>2.52%</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>9,855.625 bytes ≈ 9.625 KiB/token</strong></td><td>100%</td></tr>
   </table>
 
-  <h2>Core Formulas</h2>
-  <pre>single_kv_pair_size = 2 × (rope_dim × 2 + (head_dim - rope_dim) × 1)
-swa_per_token = (n_layers × sliding_window × kv_pair_size) / seq_len
-hca_per_token = hca_layers × (kv_pair_size / 128)
-csa_per_token = csa_layers × (kv_pair_size / 4 + indexer_key_size / 4)
-total = SWA + HCA + CSA</pre>
+  <p><strong>Total cache:</strong> 9,855.625 bytes/token × 1,048,576 tokens = 10,334,371,840 bytes = <strong>9.6246 GiB</strong>.</p>
+
+  <h2>Comparison with a BF16 GQA8 Baseline</h2>
+  <pre>GQA8 baseline = 61 layers × 8 KV heads × 2 (K and V)
+               × 128 dimensions × 2 bytes
+               = 249,856 bytes/token
+               = 244 KiB/token
+Total at 1 Mi tokens = 244 GiB
+
+BF16 reduction = 244 / 9.6246 = 25.35×
+BF16 share of baseline = 9.6246 / 244 = 3.94%</pre>
+
+  <p>vLLM's deployment recipe uses predominantly FP8 mixed storage for the main-attention cache and FP4 for the indexer cache, and describes the result as roughly another 2× reduction from the BF16 estimate. That supports an order-of-magnitude estimate of about <strong>4.8 GiB / 4.8 KiB per token</strong>, not an implementation-independent exact value. This is approximately 2% of the GQA8 baseline.</p>
 </BlogLayout>

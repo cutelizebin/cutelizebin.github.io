@@ -4,81 +4,95 @@ import BlogLayout from '../layouts/BlogLayout.astro';
 
 <BlogLayout
   title="DeepSeek-V4-Pro 每个 token 的 KVCache 大小是多少？"
-  description="DeepSeek-V4-Pro KVCache 大小计算过程，核心公式和推导"
+  description="推导 DeepSeek-V4-Pro 在 1 Mi token 上下文下的 KVCache：BF16 约 9.625 GiB，并解释 FP8/FP4 与 GQA8 基线的比较口径"
   lang="zh"
   category="模型分析"
-  date="2026 年 5 月"
+  date="2026 年 5 月 · 2026 年 8 月修订"
   dateISO="2026-05-01"
-  readingTime={5}
+  readingTime={7}
   canonical="https://cutelizebin.github.io/blog-dv4-pro-kvcache/"
 >
   <div class="highlight">
-    <div class="number">10.2 KB/token</div>
-    <div class="label">每个 token 的 KVCache 占用</div>
-    <div class="sub">1M 上下文 ≈ 10.9 MB · 相比 BF16 GQA8 压缩 24x</div>
+    <div class="number">9.625 KiB/token</div>
+    <div class="label">BF16 架构估算（1 Mi token 上下文）</div>
+    <div class="sub">总计 ≈ 9.625 GiB · FP8/FP4 部署通常约再减半</div>
   </div>
 
   <h2>结论</h2>
   <ul>
-    <li><strong>每个 token KVCache 大小：10.2 KB</strong></li>
-    <li>1M 上下文总 KVCache：≈ 10.9 MB</li>
-    <li>相比 BF16 GQA8 基线（单层 4,096 字节/token）：<strong>24x 压缩率</strong></li>
-    <li>考虑 FP4 索引器键后可达 <strong>31x</strong>，接近论文 2% 的声明</li>
+    <li>在 <strong>1,048,576 token</strong> 上下文下，BF16 KVCache 的架构估算为 <strong>9.625 GiB</strong>，平均 <strong>9.625 KiB/token</strong>。</li>
+    <li>vLLM 的部署说明指出，主 attention cache 采用以 FP8 为主的混合存储、indexer cache 使用 FP4 后，相比 BF16 估算还可<strong>大约再减半</strong>，即约 4.8 GiB；实际值取决于具体实现。</li>
+    <li>相对 61 层、8 个 KV heads、head dimension 128 的 BF16 GQA8 基线，BF16 架构估算小 <strong>25.35×</strong>；采用 FP8/FP4 后约为 <strong>50×</strong>，对应基线的约 2%。</li>
+    <li>原推导把共享 K/V 向量误算成独立的一对 KV，并将 GiB 误写成 MB；本次修订统一改为二进制单位和可复现口径。</li>
+  </ul>
+
+  <h2>数据来源与计算口径</h2>
+  <ul>
+    <li>模型参数来自 DeepSeek 的 <a href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro/blob/main/config.json" target="_blank" rel="noreferrer">DeepSeek-V4-Pro 官方配置</a>。</li>
+    <li>CSA、HCA 与混合 attention 架构来自 <a href="https://arxiv.org/abs/2606.19348" target="_blank" rel="noreferrer">DeepSeek-V4 技术报告</a>。</li>
+    <li>共享 K/V、BF16 的 9.62 GiB 算法及 FP8/FP4 部署口径参考 <a href="https://vllm.ai/blog/2026-04-24/deepseek-v4" target="_blank" rel="noreferrer">vLLM 的实现说明</a>。</li>
+    <li>下文计算的是单条序列的架构级缓存 payload，不包含实现相关的 compressor runtime state、block padding、量化 scale、allocator metadata 和临时 workspace；复核日期为 2026-08-01。</li>
   </ul>
 
   <h2>关键参数</h2>
   <table>
     <tr><th>参数</th><th>值</th></tr>
     <tr><td>head_dim</td><td>512</td></tr>
+    <tr><td>index_head_dim</td><td>128</td></tr>
     <tr><td>qk_rope_head_dim</td><td>64</td></tr>
     <tr><td>num_key_value_heads</td><td>1</td></tr>
     <tr><td>num_hidden_layers</td><td>61</td></tr>
     <tr><td>sliding_window</td><td>128</td></tr>
+    <tr><td>max_position_embeddings</td><td>1,048,576</td></tr>
   </table>
 
   <h3>压缩策略</h3>
-  <p>前 2 层 = 128（HCA），之后交替：偶数索引 = 4（CSA），奇数索引 = 128（HCA）</p>
-  <p>层数统计：HCA = 31 层，CSA = 30 层</p>
+  <p>官方配置中的 <code>compress_ratios</code> 以前两层的 128 开始，之后在 4 与 128 之间交替。因此 61 层中共有 30 个 c4a（CSA）层和 31 个 c128a（HCA）层；每层还保留最近 128 个未压缩 token 的 SWA 分支。</p>
 
-  <h2>单 KV 对大小（混合精度）</h2>
+  <h2>为什么一个缓存 entry 是 1,024 字节</h2>
+  <p>DeepSeek-V4 的主 attention 共享 Key 与 Value 向量，因此每个压缩或 SWA entry 只缓存一个 512 维向量，而不是分别缓存一份 Key 和一份 Value。BF16 下：</p>
   <ul>
-    <li>RoPE 部分：64 维 × 2 字节（BF16）= 128 字节</li>
-    <li>非 RoPE 部分：(512 - 64) = 448 维 × 1 字节（FP8）= 448 字节</li>
-    <li>单个 Key 或 Value = 128 + 448 = 576 字节</li>
-    <li>一对 KV（MQA，1 组） = 576 × 2 = <strong>1,152 字节</strong></li>
+    <li>主 attention 共享 K/V entry：512 × 2 字节 = <strong>1,024 字节</strong></li>
+    <li>仅 CSA 使用的 indexer entry：128 × 2 字节 = <strong>256 字节</strong></li>
   </ul>
 
-  <h2>各组件计算</h2>
+  <h2>BF16 各组件计算</h2>
+  <p>令上下文长度 <code>N = 1,048,576</code>。</p>
 
-  <h3>1. SWA（滑动窗口，固定缓存摊销）</h3>
-  <pre>SWA 固定缓存 = 61 层 × 128 对 × 1,152 字节 = 8,994,816 字节
-SWA 每 token (1M 上下文) = 8,994,816 / 1,048,576 = 9.0 字节</pre>
+  <h3>1. SWA（每层固定保留 128 个 entry）</h3>
+  <pre>SWA 固定缓存 = 61 × 128 × 1,024 = 7,995,392 字节
+SWA 平均每 token = 7,995,392 / N = 7.625 字节/token</pre>
 
-  <h3>2. HCA（31 层）</h3>
-  <pre>HCA 每 token 每层 = 1,152 / 128 = 9 字节
-HCA 总计 = 31 × 9 = 279 字节/token</pre>
+  <h3>2. CSA / c4a（30 层）</h3>
+  <pre>主 attention = 30 × (N / 4) × 1,024 / N = 7,680 字节/token
+indexer = 30 × (N / 4) × 256 / N = 1,920 字节/token
+CSA 合计 = 9,600 字节/token</pre>
 
-  <h3>3. CSA（30 层）</h3>
-  <pre>CSA 主 KV 每 token 每层 = 1,152 / 4 = 288 字节
-索引器键大小 = 64 × 2 + (128 - 64) × 1 = 192 字节
-CSA 索引器键每 token 每层 = 192 / 4 = 48 字节
-每 CSA 层合计 = 288 + 48 = 336 字节/token
-CSA 总计 = 30 × 336 = 10,080 字节/token</pre>
+  <h3>3. HCA / c128a（31 层）</h3>
+  <pre>HCA = 31 × (N / 128) × 1,024 / N
+    = 248 字节/token</pre>
 
   <h2>汇总</h2>
   <table>
     <tr><th>组件</th><th>每 token 大小</th><th>占比</th></tr>
-    <tr><td>SWA @ 1M</td><td>9.0 字节</td><td>0.09%</td></tr>
-    <tr><td>HCA</td><td>279 字节</td><td>2.69%</td></tr>
-    <tr><td>CSA 主 KV</td><td>8,640 字节</td><td>83.33%</td></tr>
-    <tr><td>CSA 索引器键</td><td>1,440 字节</td><td>13.89%</td></tr>
-    <tr><td><strong>总计</strong></td><td><strong>10,368 字节 ≈ 10.2 KB/token</strong></td><td>100%</td></tr>
+    <tr><td>SWA @ 1 Mi token</td><td>7.625 字节</td><td>0.08%</td></tr>
+    <tr><td>CSA 主 attention</td><td>7,680 字节</td><td>77.93%</td></tr>
+    <tr><td>CSA indexer</td><td>1,920 字节</td><td>19.48%</td></tr>
+    <tr><td>HCA 主 attention</td><td>248 字节</td><td>2.52%</td></tr>
+    <tr><td><strong>总计</strong></td><td><strong>9,855.625 字节 ≈ 9.625 KiB/token</strong></td><td>100%</td></tr>
   </table>
 
-  <h2>核心公式</h2>
-  <pre>单个 KV 对大小 = 2 × (rope_dim × 2 + (head_dim - rope_dim) × 1)
-SWA 每 token = (n_layers × sliding_window × kv_pair_size) / seq_len
-HCA 每 token = hca_layers × (kv_pair_size / 128)
-CSA 每 token = csa_layers × (kv_pair_size / 4 + indexer_key_size / 4)
-总计 = SWA + HCA + CSA</pre>
+  <p><strong>总缓存：</strong>9,855.625 字节/token × 1,048,576 token = 10,334,371,840 字节 = <strong>9.6246 GiB</strong>。</p>
+
+  <h2>与 BF16 GQA8 基线比较</h2>
+  <pre>GQA8 基线 = 61 层 × 8 KV heads × 2（K 和 V）
+           × 128 维 × 2 字节
+           = 249,856 字节/token
+           = 244 KiB/token
+1 Mi token 总量 = 244 GiB
+
+BF16 压缩倍数 = 244 / 9.6246 = 25.35×
+BF16 占基线比例 = 9.6246 / 244 = 3.94%</pre>
+
+  <p>vLLM 的实现说明给出的部署配置是主 attention cache 采用以 FP8 为主的混合存储、indexer cache 使用 FP4，并称其相对上述 BF16 估算可再节省约 2×。据此只能给出约 <strong>4.8 GiB / 4.8 KiB per token</strong> 的量级估算，而不应写成与实现无关的精确值；该量级相当于 GQA8 基线的约 2%。</p>
 </BlogLayout>
